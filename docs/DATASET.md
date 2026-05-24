@@ -7,34 +7,58 @@
 
 ## Current Phase: TRL 3 MVP
 
-**Rule:** Only mock/seed data is used. No external API calls for data. No real patient data.
+**Rule:** Data RS sudah real dari OpenStreetMap (bukan mock lagi). No external API calls for data. No real patient data.
 
 ---
 
 ## Dataset 1 — 🏥 Rumah Sakit Jakarta (PRIMARY)
 
-**Status: ✅ WAJIB — Sudah ada sebagai mock data**
+**Status: ✅ SELESAI — 234 RS REAL sudah di-seed ke Neon PostgreSQL `agata-db`**
 
-Data statis fasilitas kesehatan Jakarta yang dibutuhkan:
+> ✅ **Update 24 Mei 2026:** Data RS sudah bukan mock 15 RS lagi.
+> Sekarang ada **234 RS Jakarta real** hasil scraping OpenStreetMap via Overpass API,
+> sudah melalui 4 tahap cleaning, dan sudah di-seed ke tabel `hospitals` di Neon.
 
-| Field | Type | MVP | Full System |
+Data statis fasilitas kesehatan Jakarta yang tersedia:
+
+| Field | Type | Status MVP | Full System |
 |---|---|---|---|
-| `id` | integer | ✅ Mock | ✅ Real |
-| `name` | string | ✅ Mock | ✅ Dinkes DKI |
-| `address` | string | ✅ Mock | ✅ Dinkes DKI |
-| `phone` | string | ✅ Mock | ✅ Dinkes DKI |
-| `zone` | enum (5 zona) | ✅ Mock | ✅ Dinkes DKI |
-| `lat` / `lng` | float | ✅ Mock | ✅ OpenStreetMap |
-| `capacity` | integer | ✅ Mock | 🔴 SIRS Online Kemenkes |
-| `available_beds` | integer | ✅ Mock (static) | 🔴 Real-time Satu Data Jakarta |
-| `er_status` | AVAILABLE/BUSY/FULL | ✅ Mock (static) | 🔴 Real-time API |
-| `trauma_level` | 1/2/3 | ✅ Mock | ✅ Tipe A/B/C RS |
+| `id` | integer | ✅ Auto-increment | ✅ Real |
+| `name` | string | ✅ Real (OSM) | ✅ Dinkes DKI |
+| `address` | string | ✅ Real (OSM, 234/234) | ✅ Dinkes DKI |
+| `phone` | string | ⚠️ Parsial (12/234 punya) | ✅ Dinkes DKI |
+| `zone` | enum (5 zona) | ✅ Kalkulasi dari koordinat | ✅ Batas administratif |
+| `lat` / `lng` | float | ✅ Real (OSM) | ✅ OpenStreetMap |
+| `capacity` | integer | ⚠️ Estimasi (sebagian dari OSM `beds`) | 🔴 SIRS Online Kemenkes |
+| `available_beds` | integer | ⚠️ Estimasi random seeded | 🔴 Real-time Satu Data Jakarta |
+| `er_status` | AVAILABLE/BUSY/FULL | ⚠️ Derive dari OSM `emergency` tag | 🔴 Real-time API |
+| `trauma_level` | 1/2/3 | ✅ Derive dari nama RS | ✅ Tipe A/B/C RS |
+| `operator` | string | ✅ Real (OSM) | ✅ Dinkes DKI |
+| `operator_type` | string | ✅ Real (OSM) | ✅ Dinkes DKI |
+| `website` | string | ✅ Real (OSM, 25/234 punya) | ✅ Dinkes DKI |
+| `osm_id` | bigint | ✅ Real | - |
 
-**Sumber real (TRL 4+):** Dinas Kesehatan DKI Jakarta, SIRS Online Kemenkes, OpenStreetMap
+**Distribusi data di Neon (agata-db) saat ini:**
 
-**Mock data:** 15 RS Jakarta, 5 zona (Pusat, Selatan, Timur, Utara, Barat) — seed ada di Neon PostgreSQL `agata-db`.
+| Zona | Jumlah RS |
+|---|---|
+| Pusat | 123 |
+| Selatan | 45 |
+| Utara | 30 |
+| Barat | 21 |
+| Timur | 15 |
+| **Total** | **234** |
 
-> ⛔ **Codex:** Jangan buat integrasi API ke Dinkes atau SIRS. Gunakan data yang sudah di-seed di Neon.
+| Trauma Level | Jumlah | Keterangan |
+|---|---|---|
+| Level 1 | 8 | RS Nasional/Tipe A (RSCM, Fatmawati, Dharmais, dll) |
+| Level 2 | 30 | RSUD/RS Pemerintah Daerah |
+| Level 3 | 196 | RS Swasta / RS Khusus |
+
+**Sumber data:** OpenStreetMap via Overpass API (diambil 24 Mei 2026)
+**Sumber real lengkap (TRL 4+):** Dinas Kesehatan DKI Jakarta, SIRS Online Kemenkes
+
+> ⛔ **Codex:** Jangan buat integrasi API ke Dinkes atau SIRS. Gunakan data yang sudah di-seed di Neon. Jangan truncate atau drop tabel `hospitals` tanpa izin eksplisit.
 
 ---
 
@@ -52,7 +76,9 @@ Data ini dibutuhkan untuk validasi:
 
 **Referensi:** Jailani et al., 2023 (IEEE Xplore) — data historis ambulans Jakarta sudah dipublikasikan.
 
-> ⛔ **Codex:** Jangan implement apapun terkait fleet management, response time calculation real, atau routing ambulans. Bukan scope MVP.
+**MVP workaround:** Posisi ambulans = titik klik user di peta. Tidak ada fleet data.
+
+> ⛔ **Codex:** Jangan implement fleet management, response time calculation real, atau routing ambulans. Posisi ambulans cukup dari input koordinat user (klik peta).
 
 ---
 
@@ -74,17 +100,16 @@ Data minimal yang dibutuhkan untuk validasi (TRL 4):
 
 ## Dataset 4 — 🗺️ Data Geospasial Infrastruktur Jakarta
 
-**Status: ❌ BELUM DI MVP — Fase berikutnya**
+**Status: ⚠️ PARSIAL — Batas administratif tersedia dari GADM, road network belum**
 
-Dibutuhkan untuk routing dan analisis spasial nyata:
-- Jaringan jalan (road network) Jakarta → **OSRM / OpenStreetMap**
-- Batas administratif kelurahan/kecamatan/kota → **BPS Jakarta / BAPPEDA DKI**
-- Titik kemacetan / traffic data → **Google Maps API / HERE Maps**
-- Zona kepadatan penduduk → **BPS Jakarta**
+- ✅ Batas administratif Jakarta → sudah ada dari **GADM** (dimiliki researcher)
+- ❌ Jaringan jalan (road network) → **OSRM / OpenStreetMap** — TRL 4
+- ❌ Titik kemacetan / traffic data → **Google Maps API / HERE Maps** — TRL 4
+- ❌ Zona kepadatan penduduk → **BPS Jakarta** — TRL 4
 
-**MVP workaround:** Gunakan **Euclidean distance** (jarak lurus/garis lurus) via PostGIS `ST_Distance` — ini cukup untuk mendemonstrasikan konsep di TRL 3.
+**MVP workaround:** Gunakan **Euclidean distance** (jarak lurus) via PostGIS `ST_Distance` — cukup untuk TRL 3.
 
-> ⛔ **Codex:** Jangan implement OSRM, Google Maps Directions API, atau road network routing. Gunakan ST_Distance atau Euclidean formula biasa.
+> ⛔ **Codex:** Jangan implement OSRM, Google Maps Directions API, atau road network routing. Gunakan `ST_Distance` atau Haversine formula.
 
 ---
 
@@ -97,8 +122,6 @@ Dibutuhkan untuk LLM orchestrator memahami query natural language:
 - Embedding query ambulans (variasi cara dispatcher menyebut lokasi)
 - Geocoding dictionary (nama informal → koordinat resmi)
 
-**Sumber rencana:** Generate dari OpenRouter + Google Maps API + data lokal.
-
 > ⛔ **Codex:** Jangan install atau implement Pinecone, pgvector, atau embedding API apapun. Bukan scope MVP.
 
 ---
@@ -107,34 +130,38 @@ Dibutuhkan untuk LLM orchestrator memahami query natural language:
 
 | Prioritas | Dataset | Status MVP | Fase |
 |---|---|---|---|
-| 🔴 Wajib | Lokasi + kapasitas RS Jakarta | ✅ Mock (15 RS, Neon) | TRL 3 |
+| 🔴 Wajib | Lokasi + kapasitas RS Jakarta | ✅ **234 RS Real (OSM → Neon)** | TRL 3 ✅ |
 | 🔴 Wajib | Road network / routing | ⚠️ Euclidean workaround | TRL 3 |
+| 🟡 Penting | Batas administratif Jakarta | ✅ Tersedia dari GADM | TRL 3 |
 | 🟡 Penting | Respons time ambulans historis | ❌ Dari Cardiff | TRL 4 |
 | 🟡 Penting | Data pasien darurat minimal | ❌ Dari Cardiff (Monte Carlo) | TRL 4 |
 | 🟢 Opsional | Embedding lokasi Jakarta | ❌ Pinecone fase berikutnya | TRL 4+ |
-| 🟢 Opsional | Batas administratif | ❌ Fase berikutnya | TRL 4+ |
 
 ---
 
 ## Database Schema (Neon PostgreSQL — agata-db)
 
-Tabel `hospitals` yang sudah ada di Neon:
+Schema tabel `hospitals` yang aktif di Neon saat ini:
 
 ```sql
 CREATE TABLE hospitals (
-  id          SERIAL PRIMARY KEY,
-  name        VARCHAR(255) NOT NULL,
-  address     TEXT,
-  phone       VARCHAR(50),
-  zone        VARCHAR(20),  -- 'Pusat' | 'Selatan' | 'Timur' | 'Utara' | 'Barat'
-  lat         DOUBLE PRECISION NOT NULL,
-  lng         DOUBLE PRECISION NOT NULL,
-  location    GEOMETRY(Point, 4326),  -- PostGIS spatial column
-  capacity    INTEGER,
-  available_beds INTEGER,
-  er_status   VARCHAR(20),  -- 'AVAILABLE' | 'BUSY' | 'FULL'
-  trauma_level INTEGER,     -- 1 | 2 | 3
-  created_at  TIMESTAMP DEFAULT NOW()
+  id              SERIAL PRIMARY KEY,
+  name            VARCHAR(255) NOT NULL,
+  address         TEXT DEFAULT '',
+  phone           VARCHAR(50) DEFAULT '',
+  zone            VARCHAR(20) NOT NULL,  -- 'Pusat'|'Selatan'|'Timur'|'Utara'|'Barat'
+  lat             DOUBLE PRECISION NOT NULL,
+  lng             DOUBLE PRECISION NOT NULL,
+  location        GEOMETRY(Point, 4326),
+  capacity        INTEGER DEFAULT 100,
+  available_beds  INTEGER DEFAULT 20,
+  er_status       VARCHAR(20) DEFAULT 'BUSY',  -- 'AVAILABLE'|'BUSY'|'FULL'
+  trauma_level    INTEGER DEFAULT 3,           -- 1|2|3
+  operator        TEXT DEFAULT '',
+  operator_type   VARCHAR(50) DEFAULT '',
+  website         TEXT DEFAULT '',
+  osm_id          BIGINT,
+  created_at      TIMESTAMP DEFAULT NOW()
 );
 
 CREATE INDEX hospitals_location_gist ON hospitals USING GIST(location);
@@ -152,4 +179,4 @@ CREATE INDEX hospitals_location_gist ON hospitals USING GIST(location);
 | `GET /api/hospitals` | Semua RS, opsional sort by jarak (`?lat=&lng=`) | ✅ Done |
 | `GET /api/hospitals/nearest` | RS terdekat via ST_DWithin (`?lat=&lng=&radius=10000&limit=3`) | ✅ Done |
 
-> ✅ **Codex:** Gunakan endpoint yang sudah ada ini. Jangan buat API route baru kecuali ada kebutuhan UI yang tidak bisa dipenuhi oleh 3 endpoint di atas.
+> ✅ **Codex:** Gunakan endpoint yang sudah ada. Jangan buat API route baru kecuali ada kebutuhan UI yang tidak bisa dipenuhi oleh 3 endpoint di atas.
