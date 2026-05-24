@@ -78,17 +78,36 @@ Baca semua dokumen berikut sebelum mulai:
 
 - [ ] **TASK-10**: Buat `src/components/webgis/MapView.tsx`
   - Props: `hospitals: Hospital[]`, `patientLocation: [number,number] | null`, `recommendedIds: string[]`
-  - Init Mapbox dengan `mapbox-gl` (bukan react-map-gl)
-  - Style: `mapbox://styles/mapbox/dark-v11`
-  - Default center: `[106.8456, -6.2088]`, zoom: `11`
-  - Token: `process.env.NEXT_PUBLIC_MAPBOX_TOKEN`
-  - Marker RS: warna sesuai status (hijau/kuning/merah), custom HTML element
-  - Marker pasien: pulse animation, warna `#0ea5e9`
-  - Popup klik marker: nama RS, beds, level
-  - Saat `patientLocation` berubah: flyTo lokasi pasien (zoom 13), tambah radius circle 5km
-  - Saat `recommendedIds` berubah: highlight marker (scale 1.5 + glow border)
-  - Cleanup: hapus map instance di `useEffect` return
-  - Wajib: `'use client'` directive
+  - **WAJIB**: Gunakan `react-leaflet` + `leaflet` — JANGAN gunakan mapbox-gl
+  - **WAJIB**: Tambahkan `'use client'` directive di baris pertama
+  - **WAJIB**: File ini harus di-import dengan `dynamic()` + `{ ssr: false }` dari parent (lihat TASK-13)
+  - Tile map: Carto Dark Matter (gratis, tanpa token)
+    ```
+    https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+    ```
+  - Attribution: `&copy; <a href="https://carto.com">CARTO</a>`
+  - Default center: `[−6.2088, 106.8456]` *(perhatian: Leaflet pakai [lat, lng] bukan [lng, lat])*
+  - Default zoom: `11`
+  - Marker RS: gunakan `L.divIcon()` dengan warna sesuai status:
+    - `available` (beds ≥ 5): `#22c55e` hijau
+    - `limited` (beds 1–4): `#f59e0b` kuning
+    - `full` (beds = 0): `#ef4444` merah
+  - Marker pasien: `L.divIcon()` dengan CSS pulse animation, warna `#0ea5e9`
+  - Popup klik marker RS: tampilkan nama, shortName, beds tersedia, level
+  - Saat `patientLocation` berubah: `map.flyTo(patientLocation, 13)`
+  - Saat `patientLocation` berubah: tambahkan `L.circle()` radius 5000m (5km), warna `#0ea5e9` transparan
+  - Saat `recommendedIds` berubah: highlight marker RS yang direkomendasikan (scale lebih besar + border glow)
+  - Import CSS Leaflet di file ini: `import 'leaflet/dist/leaflet.css'`
+  - Fix icon default Leaflet di Next.js:
+    ```typescript
+    import L from 'leaflet';
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+      iconUrl: '/leaflet/marker-icon.png',
+      shadowUrl: '/leaflet/marker-shadow.png',
+    });
+    ```
 
 - [ ] **TASK-11**: Buat `src/components/webgis/Topbar.tsx`
   - Props: `currentStepId: number | null`, `isRunning: boolean`, `isDone: boolean`
@@ -101,10 +120,10 @@ Baca semua dokumen berikut sebelum mulai:
   ```typescript
   export { default as Topbar } from './Topbar';
   export { default as ChatbotPanel } from './ChatbotPanel';
-  export { default as MapView } from './MapView';
   export { default as HospitalCard } from './HospitalCard';
   export { default as KpiCard } from './KpiCard';
   export { default as AgentStatusBar } from './AgentStatusBar';
+  // MapView TIDAK di-export dari sini — harus pakai dynamic import di page.tsx
   ```
 
 ---
@@ -113,6 +132,11 @@ Baca semua dokumen berikut sebelum mulai:
 
 - [ ] **TASK-13**: Buat `src/app/dashboard/page.tsx`
   - `'use client'` directive
+  - Import MapView dengan dynamic (WAJIB untuk Leaflet):
+    ```typescript
+    import dynamic from 'next/dynamic';
+    const MapView = dynamic(() => import('@/components/webgis/MapView'), { ssr: false });
+    ```
   - State: `messages`, `patientLocation`, `recommendedIds`, `currentStepId`, `isRunning`, `isDone`, `recommendedHospitals`
   - Layout: full-height flex column
     - Row 1: `<Topbar />` (56px)
@@ -157,25 +181,27 @@ Baca semua dokumen berikut sebelum mulai:
   - Set `body { background: var(--color-bg); color: var(--color-text); }`
   - Import Google Fonts Inter + JetBrains Mono via `@import`
 
-- [ ] **TASK-16**: Update `tailwind.config.ts` (atau `.js`)
+- [ ] **TASK-16**: Update `tailwind.config.ts`
   - Extend colors dengan semua `--color-*` variables
   - Extend fontFamily: `inter` dan `mono`
 
 - [ ] **TASK-17**: Install dependencies jika belum ada
   ```bash
-  npm install mapbox-gl @types/mapbox-gl react-markdown
+  npm install leaflet react-leaflet @types/leaflet react-markdown
   ```
+  - ⛔ JANGAN install: `mapbox-gl`, `@types/mapbox-gl`, `react-map-gl`
+  - Cek `package.json` dulu sebelum install
 
-- [ ] **TASK-18**: Buat `.env.local`
-  ```env
-  NEXT_PUBLIC_MAPBOX_TOKEN=<token dari .env.example>
-  ```
+- [ ] **TASK-18**: Salin Leaflet marker icons ke folder `public/leaflet/`
+  - Copy file-file berikut dari `node_modules/leaflet/dist/images/` ke `public/leaflet/`:
+    - `marker-icon.png`
+    - `marker-icon-2x.png`
+    - `marker-shadow.png`
+  - Ini diperlukan karena Next.js tidak bisa resolve asset path Leaflet secara otomatis
 
-- [ ] **TASK-19**: Update `next.config.js` jika ada error SSR Mapbox
-  ```js
-  const nextConfig = { transpilePackages: ['mapbox-gl'] };
-  module.exports = nextConfig;
-  ```
+- [ ] **TASK-19**: TIDAK PERLU `.env.local`
+  - Leaflet + Carto tiles tidak memerlukan API token apapun
+  - Hapus atau abaikan referensi `NEXT_PUBLIC_MAPBOX_TOKEN` jika ada
 
 ---
 
@@ -183,7 +209,7 @@ Baca semua dokumen berikut sebelum mulai:
 
 - [ ] **TASK-20**: `npm run dev` — tidak ada error
 - [ ] **TASK-21**: `localhost:3000` — landing page tampil
-- [ ] **TASK-22**: Klik "Buka Dashboard" — 3-panel dashboard tampil
+- [ ] **TASK-22**: Klik "Buka Dashboard" — 3-panel dashboard tampil, peta Carto dark muncul
 - [ ] **TASK-23**: Ketik `"Cempaka Putih"` — verifikasi 4 agent steps + peta zoom + 3 HospitalCard
 - [ ] **TASK-24**: Ketik `"Jakarta Selatan"` — skenario kedua berjalan
 - [ ] **TASK-25**: Ketik `"Kelapa Gading"` — skenario ketiga berjalan
@@ -195,8 +221,9 @@ Baca semua dokumen berikut sebelum mulai:
 
 - **Prioritas**: Selesaikan FASE 1 sebelum FASE 2. Jangan mulai komponen sebelum types dan mock data selesai.
 - **Sumber data tunggal**: Gunakan `docs/MOCK_DATA.md`. Abaikan `docs/MOCK_DATA_SPEC.md`.
-- **Tidak perlu**: API routes, database, autentikasi, unit test, deployment config.
-- **Error Mapbox SSR**: tambahkan `'use client'` di MapView dan update next.config.js (TASK-19).
+- **Tidak perlu**: API routes, database, autentikasi, unit test, deployment config, env token.
+- **⚠️ Leaflet SSR**: MapView WAJIB di-import dengan `dynamic(() => import(...), { ssr: false })` di dashboard/page.tsx. Tanpa ini akan error `window is not defined`.
+- **⚠️ Koordinat Leaflet**: Format `[lat, lng]` — KEBALIKAN dari Mapbox yang `[lng, lat]`.
 - **Error path alias**: pastikan `tsconfig.json` punya `"paths": { "@/*": ["./src/*"] }`.
 
 ---

@@ -30,7 +30,7 @@ User (Ambulance Dispatcher)
 ┌─────────────────────────────────────────────────────────┐
 │              LLM Orchestrator (OpenRouter)               │
 │         Translates requests → coordinates agents        │
-└──────┬──────────┬──────────────┬───────────────┘
+└──────┬──────────┬──────────────┬───────────────┬────────┘
        │          │              │               │
        ▼          ▼              ▼               ▼
 ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌───────────────┐
@@ -39,7 +39,7 @@ User (Ambulance Dispatcher)
 │  Agent   │ │  Agent   │ │    Agent     │ │    Agent      │
 └──────────┘ └──────────┘ └──────────────┘ └───────────────┘
        │          │              │               │
-       └──────────┴──────────────┴──────────────┘
+       └──────────┴──────────────┴───────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -48,7 +48,7 @@ User (Ambulance Dispatcher)
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│           UI Layer: Mapbox WebGIS Dashboard              │
+│        UI Layer: Leaflet WebGIS Dashboard (dark)        │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -64,17 +64,15 @@ cd AGATA-Agentic-GeoAI-for-Ambulance-and-Triage-Assistance
 # 2. Install dependencies
 npm install
 
-# 3. Set up environment variables
-cp .env.example .env.local
-# Edit .env.local and add your Mapbox public token
-
-# 4. Run development server
+# 3. Run development server (no .env needed!)
 npm run dev
 
-# 5. Open browser
-# http://localhost:3000          ← Landing page
+# 4. Open browser
+# http://localhost:3000           ← Landing page
 # http://localhost:3000/dashboard ← WebGIS Dashboard
 ```
+
+> ✅ **No API token required.** Map tiles are served by Carto (free, no registration).
 
 ---
 
@@ -82,7 +80,7 @@ npm run dev
 
 ```
 ├── CODEX.md                        # Operational instructions for AI coding agents
-├── .env.example                    # Environment variable template
+├── .env.example                    # No tokens needed — see file for details
 ├── docs/
 │   ├── AGENT_BRIEF.md              # Master brief: project context & MVP scope
 │   ├── TASKS.md                    # Agent execution checklist (26 tasks, 5 phases)
@@ -98,7 +96,7 @@ npm run dev
     ├── components/
     │   └── webgis/
     │       ├── Topbar.tsx          # App header + AgentStatusBar + live clock
-    │       ├── MapView.tsx         # Mapbox GL map + hospital markers + routing
+    │       ├── MapView.tsx         # Leaflet map + hospital markers (dynamic import)
     │       ├── ChatbotPanel.tsx    # Chat interface sidebar
     │       ├── AgentStatusBar.tsx  # 4-agent pipeline visualization
     │       ├── HospitalCard.tsx    # Hospital recommendation card
@@ -137,7 +135,7 @@ npm run dev
 - **International Partner:** Cardiff University (OR Group) — Syaribah Noor Brice, Prof. Daniel Gartner
 - **SDGs:** SDG 3 (Good Health), SDG 9 (Innovation), SDG 11 (Sustainable Cities)
 - **Phase:** TRL 3 — Proof of Concept (2025–2026)
-- **Tech Stack:** Next.js · TypeScript · Tailwind CSS · Mapbox GL JS
+- **Tech Stack:** Next.js · TypeScript · Tailwind CSS · Leaflet · react-leaflet · Carto Tiles
 
 ---
 
