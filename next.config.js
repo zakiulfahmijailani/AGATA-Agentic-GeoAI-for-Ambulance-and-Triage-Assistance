@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  transpilePackages: ['mapbox-gl'],
-};
+const nextConfig = {};
 
 module.exports = nextConfig;

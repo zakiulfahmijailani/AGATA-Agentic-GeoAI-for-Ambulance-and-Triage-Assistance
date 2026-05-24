@@ -1,11 +1,11 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatbotPanel,
   HospitalCard,
   KpiCard,
-  MapView,
   Topbar,
 } from '@/components/webgis';
 import { mockHospitals } from '@/lib/mock/hospitals';
@@ -13,6 +13,11 @@ import { defaultChatResponse, matchScenario } from '@/lib/mock/chatResponses';
 import { mockAgentSteps } from '@/lib/mock/agentSteps';
 import { dashboardStats } from '@/lib/mock/dashboardStats';
 import type { Hospital, Message } from '@/types';
+
+const MapView = dynamic(() => import('@/components/webgis/MapView'), {
+  ssr: false,
+  loading: () => <section className="h-full flex-1 bg-[#07101f]" />,
+});
 
 const initialSystemMessage: Message = {
   id: 'system-welcome',
