@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, RadioTower } from 'lucide-react';
 import { AgentStep } from '@/types';
 
 interface AgentStatusBarProps {
@@ -20,31 +20,37 @@ export default function AgentStatusBar({
   const activeStep = steps.find((step) => step.id === currentStepId) ?? null;
 
   return (
-    <div className="min-w-[220px]">
+    <div className="flex h-9 w-full shrink-0 items-center justify-between border-b border-slate-700 bg-slate-950 px-4 text-xs text-slate-300">
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+        </span>
+        <span>
+          AGATA Agent · <span className="font-semibold text-green-400">Active</span>
+        </span>
+      </div>
+
       <AnimatePresence mode="wait">
         {isDone ? (
           <motion.div
             key="done"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 8 }}
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            className="hidden items-center gap-2 text-emerald-300 sm:inline-flex"
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span>Analisis Selesai</span>
+            <span className="font-semibold">Analisis Selesai</span>
           </motion.div>
         ) : isRunning && activeStep ? (
           <motion.div
             key={`running-${activeStep.id}`}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 8 }}
-            className="inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold"
-            style={{
-              backgroundColor: `${activeStep.color}18`,
-              borderColor: `${activeStep.color}55`,
-              color: activeStep.color,
-            }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            className="hidden max-w-[48vw] items-center gap-2 truncate sm:inline-flex"
+            style={{ color: activeStep.color }}
           >
             <span className="flex h-4 w-4 items-center justify-center gap-0.5">
               {[0, 1, 2].map((dot) => (
@@ -58,21 +64,27 @@ export default function AgentStatusBar({
                 />
               ))}
             </span>
-            <span className="truncate">{activeStep.name}</span>
+            <span className="truncate">
+              {activeStep.name} · {activeStep.description}
+            </span>
           </motion.div>
         ) : (
           <motion.div
             key="idle"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 8 }}
-            className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/10 px-3 py-1.5 text-xs font-semibold text-teal-300"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            className="hidden items-center gap-2 text-slate-400 sm:inline-flex"
           >
-            <span className="h-2 w-2 rounded-full bg-teal-400" />
-            <span>Sistem Siap</span>
+            <RadioTower className="h-4 w-4 text-[var(--color-teal)]" />
+            <span>Pipeline siap menerima lokasi pasien</span>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="font-mono text-slate-400">
+        {currentStepId ? `Step ${currentStepId}/${steps.length}` : 'Standby'}
+      </div>
     </div>
   );
 }
