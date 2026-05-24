@@ -20,16 +20,25 @@ The proposal follows a **Human-Centered AI (HCAI)** framework with 5 phases:
 
 ---
 
-## Why Mapbox (Not Leaflet or Google Maps)
+## Why Leaflet (Not Mapbox)
 
-The proposal explicitly names **Mapbox** as the mapping layer because:
-1. Supports **geocoding** (converting addresses to coordinates)
-2. Supports **routing** (actual road-based distance calculation)
-3. Supports **custom styles** (dark WebGIS aesthetic for professional demos)
-4. Supports **WebGL rendering** (performant with many markers)
-5. Already budgeted in the proposal RAB (Research Budget Plan)
+> ⚠️ **IMPORTANT FOR CODEX:** The original proposal mentioned Mapbox, but it has been replaced with **Leaflet + react-leaflet** for the MVP. Do NOT reintroduce Mapbox.
 
-For MVP: use `mapbox://styles/mapbox/dark-v11`, mock routing with straight lines.
+Reason for replacement:
+1. Mapbox **requires a credit card** even for free-tier usage — not suitable for open research demos
+2. Leaflet is **100% free** with no token required
+3. Carto Dark Matter tiles provide the same dark WebGIS aesthetic
+4. Leaflet is already used in the SIGAPP reference system
+
+**Leaflet rules (MUST follow):**
+```typescript
+// ALWAYS use dynamic import with ssr: false
+const MapView = dynamic(() => import('@/components/webgis/MapView'), { ssr: false });
+
+// Leaflet coordinate order: [lat, lng] — NOT [lng, lat]
+// Tile URL: https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+// Center Jakarta: [-6.2088, 106.8456], zoom: 12
+```
 
 ---
 
@@ -47,9 +56,9 @@ From Figure 2 of the proposal, the architecture has exactly 4 specialist agents:
 
 | Agent | MVP Role | Full System Role |
 |-------|----------|------------------|
-| **Data Retrieval Agent** | Mock: load from JSON | Real: FastAPI → PostGIS query → Pinecone semantic search |
-| **Spatial Analysis Agent** | Mock: return hardcoded distances | Real: PostGIS ST_Distance, ST_DWithin routing |
-| **Data Visualization Agent** | Mock: render Mapbox pins | Real: generate dynamic map overlays, route animations |
+| **Data Retrieval Agent** | Mock: load from Neon PostgreSQL | Real: FastAPI → PostGIS query → Pinecone semantic search |
+| **Spatial Analysis Agent** | Mock: Euclidean distance (straight-line) | Real: PostGIS ST_Distance, ST_DWithin, OSRM routing |
+| **Data Visualization Agent** | Mock: render Leaflet markers | Real: generate dynamic map overlays, route animations |
 | **Report Generator Agent** | Mock: return pre-written text | Real: LLM-generated ranked report with justification |
 
 The `AgentStatusBar` visualizes this pipeline running in sequence.
@@ -58,7 +67,7 @@ The `AgentStatusBar` visualizes this pipeline running in sequence.
 
 ## Why Next.js (Not React SPA or Vite)
 
-1. **App Router** provides clean `/` and `/dashboard` routing without extra config
+1. **App Router** provides clean routing without extra config
 2. **`next/font`** for optimized Inter font loading
 3. **Server Components** for potential future data fetching (PostGIS integration)
 4. **Consistent with SIGAPP** repo architecture (previous research system at Universitas Bakrie)
@@ -75,28 +84,43 @@ The `AgentStatusBar` visualizes this pipeline running in sequence.
 
 ---
 
-## Data Flow (MVP)
+## ⛔ MVP SCOPE GUARDRAILS — DO NOT IMPLEMENT
+
+> These are explicitly OUT OF SCOPE for TRL 3 MVP. Codex must NOT implement these, even if they seem like natural extensions.
+
+| Feature | Why Out of Scope |
+|---|---|
+| OSRM / Mapbox routing | Road network data not yet available. Use Euclidean distance. |
+| Pinecone / vector DB | Embedding phase is TRL 4+ |
+| Real-time bed capacity API | Satu Data Jakarta API integration is TRL 4 |
+| Monte Carlo simulation | Cardiff contribution — not in MVP |
+| LLM API calls (OpenRouter, GPT) | Mocked responses only for MVP |
+| Multi-city support | Jakarta only for TRL 3 |
+| Docker / AWS deployment | Vercel only for MVP |
+| Patient data / EHR | No real patient data in MVP |
+
+See `docs/DATASET.md` for full dataset scope and guardrails.
+
+---
+
+## Data Flow (MVP — Current Implementation)
 
 ```
-[User types in ChatbotPanel]
+[User clicks on map / submits query]
         ↓
-[handleQuerySubmit() in /dashboard/page.tsx]
+[Dashboard page.tsx handles state]
         ↓
-[matchScenario(query) → finds matching DemoScenario]
+[Calls GET /api/hospitals/nearest?lat=&lng=&radius=10000&limit=3]
         ↓
-[AgentStatusBar animation — 4 × 1000ms setTimeout]
+[API route queries Neon PostgreSQL via ST_DWithin (PostGIS)]
         ↓
-[setRecommendedHospitals(matched hospitals from mockHospitals)]
+[Returns top 3 nearest hospitals by Euclidean distance]
         ↓
-[setPatientLocation(scenario.patientLocation)]
+[AgentStatusBar shows animation — simulates 4-agent pipeline]
         ↓
-[ChatbotPanel renders scenario.chatResponse]
+[HospitalSidebar renders ranked list with distance + ER status]
         ↓
-[HospitalCard renders for each recommendedHospital]
-        ↓
-[MapView receives new recommendedIds + patientLocation props]
-        ↓
-[Map flies to zone, shows pulse markers + dashed route lines]
+[MapView highlights recommended hospitals with pulse markers]
 ```
 
 ---
@@ -127,9 +151,10 @@ This MVP targets **TRL 3**: experimental proof of concept.
 | Component | MVP | Full System |
 |-----------|-----|-------------|
 | LLM | Mocked responses | OpenRouter API (GPT-4o / Claude 3.5) |
-| Spatial DB | Mock JSON | PostGIS on AWS RDS |
-| Vector DB | Not present | Pinecone (hospital embeddings) |
-| Routing | Straight lines | Mapbox Directions API / OSRM |
-| Bed capacity | Static mock | Real-time Satu Data Jakarta API |
+| Spatial DB | Neon PostgreSQL + PostGIS (mock seed) | PostGIS with real Dinkes DKI data |
+| Vector DB | Not present | Pinecone (hospital + location embeddings) |
+| Routing | Euclidean straight-line distance | Mapbox Directions API / OSRM |
+| Bed capacity | Static mock data | Real-time Satu Data Jakarta API |
 | Validation | None | Cardiff Monte Carlo simulation |
 | Deployment | Vercel (free) | Docker on AWS EC2 |
+| Data source | 15 mock hospitals | Full Dinkes DKI + SIRS Online Kemenkes |
