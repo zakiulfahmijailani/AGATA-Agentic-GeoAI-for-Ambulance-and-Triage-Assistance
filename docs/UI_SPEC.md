@@ -1,156 +1,341 @@
-# UI SPECIFICATION — AGATA WebGIS
+# UI_SPEC.md — WebGIS MVP: Ambulance Hospital Recommendation Dashboard
+
+Dokumen ini adalah spesifikasi visual dan komponen untuk AI agent yang membangun WebGIS MVP.
+Tujuan: **showcase proposal riset**, bukan produksi. Tampilan harus terlihat seperti sistem GovTech/smart city yang profesional dan credible secara akademik.
 
 ---
 
-## Design Principles
+## 1. Design Language
 
-1. **Dark-first** — dark navy background creates a professional GeoAI/smart city feel
-2. **Data-dense but readable** — inspired by govtech products (Jakarta Smart City, BPS dashboards)
-3. **Map is king** — the map takes the most space; everything else supports it
-4. **Teal accent** — used exclusively for primary actions and highlights; not decoration
+### Tone & Persona
+- **Smart City / GovTech** — bersih, data-dense, terpercaya
+- Mengacu pada produk seperti: Jakarta Smart City Dashboard, WHO Health GIS Portal
+- Bukan startup SaaS — lebih serius, institutional, research-oriented
+- Dark mode default (peta gelap lebih mudah dibaca untuk GIS)
 
----
-
-## Color System
+### Color Palette
 
 ```css
-/* Brand */
---brand-navy:      #0f2d4a;   /* Primary background */
---brand-navy-2:    #1a3d5c;   /* Secondary surfaces */
---brand-navy-3:    #1e4a6e;   /* Hover states, cards */
---brand-teal:      #01b4bc;   /* Primary accent — CTAs, highlights */
---brand-teal-dim:  #0a7b82;   /* Hover state of teal */
---brand-teal-bg:   #012f31;   /* Very subtle teal surface */
+:root {
+  /* Backgrounds */
+  --color-bg:            #0b1120;   /* navy gelap — background utama */
+  --color-surface:       #111827;   /* panel sidebar, card */
+  --color-surface-2:     #1a2234;   /* hover state, nested card */
+  --color-border:        #1e2d45;   /* border subtle */
 
-/* Text */
---text-primary:    #f0f7ff;   /* Main text on dark */
---text-secondary:  #94b4cc;   /* Muted text */
---text-faint:      #4a7a9b;   /* Very muted / disabled */
+  /* Text */
+  --color-text:          #e2e8f0;   /* teks utama */
+  --color-text-muted:    #94a3b8;   /* teks sekunder */
+  --color-text-faint:    #475569;   /* label, metadata */
 
-/* Status (hospital bed availability) */
---status-available: #10b981; /* green — >= 5 beds */
---status-limited:   #f59e0b; /* amber — 1-4 beds */
---status-full:      #ef4444; /* red   — 0 beds */
+  /* Accent — Teal (GeoAI / Healthcare) */
+  --color-primary:       #0ea5e9;   /* biru langit — link, CTA, highlight */
+  --color-primary-glow:  #0ea5e922; /* glow di belakang elemen aktif */
+  --color-teal:          #14b8a6;   /* agen aktif, status tersedia */
+  --color-teal-dim:      #14b8a620;
 
-/* Agent pipeline colors */
---agent-retrieval:     #3b82f6;  /* blue */
---agent-spatial:       #10b981;  /* green */
---agent-visualization: #f59e0b;  /* amber */
---agent-report:        #8b5cf6;  /* purple */
+  /* Status */
+  --color-success:       #22c55e;   /* RS tersedia */
+  --color-warning:       #f59e0b;   /* RS terbatas */
+  --color-error:         #ef4444;   /* RS penuh */
 
-/* Dividers & borders */
---border:          rgba(1, 180, 188, 0.15);
---border-subtle:   rgba(255, 255, 255, 0.06);
+  /* Agen Pipeline Colors */
+  --color-agent-1:       #818cf8;   /* Data Retrieval — ungu */
+  --color-agent-2:       #0ea5e9;   /* Spatial Analysis — biru */
+  --color-agent-3:       #14b8a6;   /* Data Visualization — teal */
+  --color-agent-4:       #22c55e;   /* Report Generator — hijau */
+}
 ```
+
+### Typography
+
+```html
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+```
+
+| Elemen | Font | Size | Weight |
+|--------|------|------|--------|
+| App title / judul halaman | Inter | 1.25rem | 700 |
+| Section heading | Inter | 0.875rem | 600 |
+| Body / chat text | Inter | 0.875rem | 400 |
+| Label, badge, metadata | Inter | 0.75rem | 500 |
+| Koordinat, data teknis | JetBrains Mono | 0.75rem | 400 |
+| KPI angka besar | Inter | 1.75rem | 700 |
+
+**Tidak ada font display besar** — ini dashboard bukan landing page.
 
 ---
 
-## Typography
+## 2. Layout Dashboard Utama (`/dashboard`)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  TOPBAR (56px)  — Logo | Judul Proyek | AgentStatusBar | Timestamp     │
+├──────────────────┬──────────────────────────────────┬───────────────────┤
+│                  │                                  │                   │
+│  CHATBOT PANEL   │        MAPBOX MAP CANVAS         │  HOSPITAL LIST    │
+│  (320px, fixed)  │      (flex-grow, 100%)           │  PANEL            │
+│                  │                                  │  (340px)          │
+│  - Input bar     │  - Marker RS (custom icon)       │  - slide-in       │
+│  - Chat history  │  - Garis rute mock               │    saat ada       │
+│  - Suggestion    │  - Popup info RS                 │    rekomendasi    │
+│    chips         │  - Radius coverage               │                   │
+│                  │                                  │  - Default:       │
+│                  │                                  │    KPI Stats      │
+│                  │                                  │    cards          │
+│                  │                                  │                   │
+└──────────────────┴──────────────────────────────────┴───────────────────┘
+```
+
+### Topbar
+
+- **Logo**: SVG inline — ikon peta + pulse (ambulance/emergency)
+- **Judul**: "Agentic GeoAI — Jakarta Ambulance Recommendation"
+- **AgentStatusBar** (tengah-kanan): pill kecil yang beranimasi saat agent berjalan
+- **Timestamp**: live clock `HH:MM:SS` dengan JetBrains Mono
+- Background: `--color-surface` + `border-bottom: 1px solid var(--color-border)`
+- Height: `56px`
+
+### Chatbot Panel (Kiri, 320px)
+
+- Background: `--color-surface`
+- Border-right: `1px solid var(--color-border)`
+- Chat bubbles:
+  - **User**: align right, `background: var(--color-primary)`, warna teks putih
+  - **Assistant**: align left, `background: var(--color-surface-2)`, teks `--color-text`
+- **Suggestion chips**: 3 buah, border teal, klik otomatis isi input
+- **Input bar**: bottom sticky, input `background: --color-surface-2`
+
+### Mapbox Map Canvas (Tengah, flex-grow)
+
+- **Style**: `mapbox://styles/mapbox/dark-v11` (dark map wajib)
+- **Default center**: `[106.8456, -6.2088]` (Jakarta Pusat)
+- **Default zoom**: `11`
+- **Custom markers RS**:
+  - Tersedia: ikon `+` berwarna `--color-success` (hijau)
+  - Terbatas: ikon `+` berwarna `--color-warning` (kuning)
+  - Penuh: ikon `+` berwarna `--color-error` (merah)
+- **Marker pasien**: ikon bintang/pulse berwarna `--color-primary`
+- **Popup** saat klik marker: nama RS, status, jumlah beds tersedia
+- **Radius circle**: lingkaran transparan 5km dari posisi pasien (fill `#0ea5e915`, stroke `#0ea5e9`)
+- **Mock route line**: `LineString` GeoJSON dari titik pasien ke RS terdekat, warna `--color-teal`, `line-width: 2`, `line-dasharray: [2, 1]`
+
+### Hospital List Panel (Kanan, 340px)
+
+**Default state** (sebelum ada query): tampilkan 4 KPI cards
+
+**Active state** (setelah ada rekomendasi): list HospitalCard dengan rank, nama, jarak, kapasitas bar, status badge, tombol "Lihat di Peta"
+
+---
+
+## 3. Komponen Inventory
+
+### `<Topbar />`
+- Props: `agentStatus: AgentStep | null`, `isRunning: boolean`
+- Berisi: Logo SVG, judul, AgentStatusBar, LiveClock
+
+### `<AgentStatusBar />`
+- Props: `steps: AgentStep[]`, `currentStep: number`, `isRunning: boolean`
+- Tampilan saat idle: `● Sistem Siap` (teal)
+- Tampilan saat running: pill animasi dengan nama agen saat ini + spinner kecil
+- Tampilan saat selesai: `✓ Analisis Selesai` (hijau, 2 detik lalu fade ke idle)
+- Animasi: `opacity` fade + subtle slide dari kiri
+
+### `<ChatbotPanel />`
+- State: `messages: Message[]`, `inputValue: string`, `isLoading: boolean`
+- Saat kirim pesan: trigger `onQuery(input)` → parent mulai pipeline agen
+- Render `content` dengan `react-markdown`
+- Auto-scroll ke bawah setiap ada pesan baru
+
+### `<MapView />`
+- Props: `hospitals: Hospital[]`, `patientLocation: [number,number] | null`, `recommendedIds: string[]`
+- Gunakan `mapbox-gl` langsung (bukan react-map-gl)
+- `useEffect` untuk init map, cleanup saat unmount
+- `recommendedIds`: highlight marker RS yang direkomendasikan (scale up + glow)
+
+### `<HospitalCard />`
+- Props: `hospital: Hospital`, `rank: number`, `isRecommended: boolean`
+- Tampilan: nomor ranking, nama, jarak, kapasitas bar, status badge, tombol "Lihat di Peta"
+
+### `<KpiCard />`
+- Props: `value: string`, `label: string`, `icon: ReactNode`, `color?: string`
+- Ukuran: setengah lebar panel, height 80px
+
+### `<AgentPipelineVisualizer />` (opsional)
+- 4 kotak agen berurutan dengan connector arrow `→`
+- State aktif: border glow + warna agen
+
+---
+
+## 4. Landing Page (`/`)
+
+- Background: `--color-bg` + subtle grid pattern CSS
+- Logo SVG ambulance + map pulse
+- Judul, subjudul, badge "Universitas Bakrie × Cardiff University"
+- CTA button `[ Buka Dashboard → ]`
+- Footer kecil: "Agentic GeoAI 2023–2027 (TRL 3 Phase)"
+
+---
+
+## 5. Interaksi & Animasi
+
+### Alur Interaksi Utama (setTimeout chain)
+
+```
+1. User submit input di ChatbotPanel
+2. Bubble user muncul (langsung)
+3. AgentStatusBar: mulai pipeline
+   - Step 1 (1000ms): "● Data Retrieval Agent — Mengambil data RS..."
+   - Step 2 (1000ms): "● Spatial Analysis Agent — Menghitung jarak..."
+   - Step 3 (800ms):  "● Data Visualization Agent — Menyiapkan peta..."
+   - Step 4 (600ms):  "● Report Generator Agent — Menyusun rekomendasi..."
+4. MapView: zoom ke area pasien, munculkan markers + radius circle + route line
+5. HospitalCard muncul di panel kanan (slide-in dari kanan)
+6. Bubble assistant muncul di chat dengan respons lengkap
+7. AgentStatusBar: "✓ Analisis Selesai" → fade ke idle
+```
+
+### CSS Animations
 
 ```css
-font-family: 'Inter', -apple-system, sans-serif;
-
-/* Scale */
---text-xs:    0.75rem;   /* 12px — tiny labels */
---text-sm:    0.875rem;  /* 14px — secondary info */
---text-base:  1rem;      /* 16px — body */
---text-lg:    1.125rem;  /* 18px — section heads */
---text-xl:    1.25rem;   /* 20px — panel titles */
---text-2xl:   1.5rem;    /* 24px — page title */
---text-hero:  2.25rem;   /* 36px — landing hero */
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.3); opacity: 0.8; }
+}
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%            { transform: translateY(-6px); }
+}
+@keyframes agentFadeIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 ```
 
 ---
 
-## Layout Specifications
-
-### Dashboard Layout (desktop, min 1280px)
+## 6. File Structure yang Harus Dibuat Agent
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│ Header: h-14 (56px), sticky, bg-navy border-b border-teal/20    │
-├──────────────┬──────────────────────────────┬───────────────────┤
-│ ChatbotPanel │         MapView              │  Results + Stats  │
-│   w-[300px]  │     flex-1 (fills rest)      │    w-[320px]      │
-│   h-[calc    │     h-[calc(100vh-56px)]     │    h-[calc        │
-│   100vh-56px │                              │    100vh-56px)]   │
-│   )]         │                              │                   │
-└──────────────┴──────────────────────────────┴───────────────────┘
+src/
+├── app/
+│   ├── page.tsx                          ← Landing page
+│   └── dashboard/
+│       └── page.tsx                      ← Dashboard utama
+├── components/
+│   └── webgis/
+│       ├── Topbar.tsx
+│       ├── AgentStatusBar.tsx
+│       ├── ChatbotPanel.tsx
+│       ├── MapView.tsx
+│       ├── HospitalCard.tsx
+│       ├── KpiCard.tsx
+│       ├── AgentPipelineVisualizer.tsx   ← opsional
+│       └── index.ts
+├── lib/
+│   └── mock/
+│       ├── hospitals.ts
+│       ├── chatResponses.ts
+│       ├── agentSteps.ts
+│       └── dashboardStats.ts
+└── types/
+    └── webgis.ts
 ```
 
-**Total width:** 300 + flex-1 + 320 = fills 100vw
+### `types/webgis.ts`
 
-### Header contents (left → right):
-1. `AGATA` logo (teal wordmark) + `WebGIS Dashboard` in text-secondary (16px gap)
-2. `AgentStatusBar` (centered, absolute or margin auto)
-3. Theme toggle icon + a `?` help button
+```typescript
+export interface Hospital {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  bedsAvailable: number;
+  totalBeds: number;
+  icuAvailable: number;
+  totalIcu: number;
+  status: 'Tersedia' | 'Terbatas' | 'Penuh';
+  specialization: string[];
+  address: string;
+  distances: Record<ScenarioId, number>;
+}
 
----
+export type ScenarioId = 'cempaka-putih' | 'jakarta-selatan' | 'jakarta-timur';
 
-## Component Visual Details
+export interface AgentStep {
+  id: number;
+  name: string;
+  description: string;
+  durationMs: number;
+  color: string;
+  outputSummary: string;
+}
 
-### ChatbotPanel
-- Background: `#1a3d5c` (navy-2)
-- Border-right: `1px solid rgba(1, 180, 188, 0.2)`
-- Panel title bar: `bg-navy-3` with robot icon + "Asisten AGATA"
-- Message bubbles:
-  - User: `bg-brand-teal text-white` rounded-2xl rounded-br-none
-  - Assistant: `bg-navy-3 text-text-primary` rounded-2xl rounded-bl-none
-  - System: `text-text-faint text-xs italic` centered
-- Typing indicator: 3 pulsing dots, same color as assistant bubble
-- Input bar: `bg-navy` border-top, teal focus ring
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+}
 
-### MapView
-- Map style: `mapbox://styles/mapbox/dark-v11`
-- Hospital markers:
-  - Circle, 18px diameter
-  - Green fill if available, amber if limited, red if full
-  - White 2px stroke
-  - Pulse animation (scale 1→1.5 opacity 1→0 repeat) on recommended hospitals
-- Patient pin: white ambulance cross icon or red pulsing dot (24px)
-- Route lines: dashed, 2px, teal `#01b4bc` opacity 0.7
-- Legend: bottom-left corner, `bg-navy/80 backdrop-blur-sm` card, 3 items
-- Attribution: bottom-right, standard Mapbox (required)
+export interface ChatScenario {
+  id: ScenarioId;
+  triggerKeywords: string[];
+  patientLocation: [number, number];
+  patientLabel: string;
+  agentThinking: string;
+  recommendedHospitalIds: string[];
+  responseMarkdown: string;
+}
 
-### AgentStatusBar
-- Container: `bg-navy-3 rounded-full px-4 py-2 border border-teal/20`
-- 4 pills connected by `···` (dot separator)
-- Idle state: pill `bg-navy text-text-faint`
-- Running state: pill `bg-agent-color/20 text-agent-color border border-agent-color/50` + spinner icon
-- Done state: pill `bg-agent-color/10 text-agent-color/70` + checkmark icon
-- Framer Motion: `AnimatePresence` + `motion.div` with `layoutId` for smooth transitions
-
-### HospitalCard
-- Container: `bg-navy-2 border border-border rounded-xl p-4 hover:border-teal/40 transition-all`
-- Recommended: add `ring-1 ring-brand-teal` and rank badge in top-right corner
-- Rank badges: `#FFD700` = 1st, `#C0C0C0` = 2nd, `#CD7F32` = 3rd (gold/silver/bronze)
-- Status badge: `bg-status-color/20 text-status-color` small pill bottom-right
-- `Pilih RS Ini` button: `bg-brand-teal text-white hover:bg-teal-dim w-full mt-3 rounded-lg py-2 text-sm font-medium`
-
-### DashboardStats KPI Cards
-- 4 cards stacked with `gap-3`
-- Each: `bg-navy-2 border border-border rounded-xl p-4`
-- Value: `text-2xl font-bold text-text-primary`
-- Label: `text-xs text-text-secondary uppercase tracking-wide`
-- Icon: `24px Lucide icon text-brand-teal`
+export interface KpiStat {
+  value: string;
+  label: string;
+  iconName: string;
+  color: string;
+}
+```
 
 ---
 
-## Landing Page
+## 7. Dependency yang Diizinkan
 
-- Background: `linear-gradient(135deg, #0f2d4a 0%, #001a2e 100%)` + subtle grid SVG overlay
-- Logo: `AGATA` in 48px font-black with teal accent on the A
-- Tagline: 24px, text-text-primary
-- Sub-tagline: 16px, text-text-secondary
-- Feature badges: `bg-navy-2 border border-border rounded-full px-4 py-2 text-sm`
-- CTA button: `bg-brand-teal text-white text-lg font-semibold px-8 py-4 rounded-full hover:scale-105 transition`
-- SDG badges: small colored circles with SDG number (3=green, 9=orange, 11=gold)
-- Centered layout, max-width 640px
+```json
+{
+  "mapbox-gl": "^3.x",
+  "@types/mapbox-gl": "^3.x",
+  "react-markdown": "^9.x"
+}
+```
+
+**JANGAN install**: `react-map-gl`, `leaflet`, `deck.gl`, `axios`, `swr`, `zustand`
 
 ---
 
-## Responsive Behavior
+## 8. Environment Variable
 
-- **< 1024px:** Collapse to tabs (Map / Chat / Results)
-- **< 768px:** Single column, map top, chat bottom as slide-up sheet
-- **For MVP:** desktop-first is acceptable, add basic mobile layout if time permits
+```env
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoiZGVtby10b2tlbiIsImEiOiJja...
+```
+
+---
+
+## 9. Hal yang TIDAK Perlu Dikerjakan Agent
+
+- ❌ Autentikasi / login
+- ❌ API routes (`/api/*`)
+- ❌ Koneksi database
+- ❌ Pemanggilan LLM nyata
+- ❌ Unit test / E2E test
+- ❌ Deployment config
+- ❌ PWA / service worker
+- ❌ Internasionalisasi
+
+---
+
+*Dokumen ini dibaca bersama `AGENT_BRIEF.md`, `MOCK_DATA_SPEC.md`, dan `ARCHITECTURE.md`.*
