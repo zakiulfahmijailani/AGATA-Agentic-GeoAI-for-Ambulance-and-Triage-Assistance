@@ -14,8 +14,9 @@ interface HospitalSidebarProps {
   isLoading: boolean;
   messages: Message[];
   recommendedHospitals: HospitalType[];
-  recommendedIds: string[];
-  getDistance: (hospitalId: string) => number;
+  visibleHospitals: HospitalType[];
+  recommendedIds: number[];
+  getDistance: (hospital: HospitalType) => number;
   onClose: () => void;
   onHospitalSelect: (hospital: HospitalType) => void;
   onQuery: (query: string) => void;
@@ -28,6 +29,7 @@ export default function HospitalSidebar({
   isLoading,
   messages,
   recommendedHospitals,
+  visibleHospitals,
   recommendedIds,
   getDistance,
   onClose,
@@ -58,6 +60,11 @@ export default function HospitalSidebar({
     event.preventDefault();
     submitQuery(inputValue);
   }
+
+  const hasRecommendations = recommendedHospitals.length > 0;
+  const displayedHospitals = hasRecommendations
+    ? recommendedHospitals.slice(0, 3)
+    : visibleHospitals.slice(0, 10);
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--color-surface)]">
@@ -104,28 +111,28 @@ export default function HospitalSidebar({
           <div className="space-y-3">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
-                Rekomendasi RS
+                {hasRecommendations ? 'Rekomendasi RS' : 'RS Terfilter'}
               </h3>
               <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                {recommendedHospitals.length
+                {hasRecommendations
                   ? `Skenario aktif: ${activeScenarioId ?? 'simulasi'}`
-                  : 'Kirim lokasi pasien dari tab Chat untuk memulai analisis.'}
+                  : 'Daftar mengikuti filter yang aktif di peta.'}
               </p>
             </div>
-            {recommendedHospitals.length ? (
-              recommendedHospitals.slice(0, 3).map((hospital, index) => (
+            {displayedHospitals.length ? (
+              displayedHospitals.map((hospital, index) => (
                 <HospitalCard
                   key={hospital.id}
                   hospital={hospital}
                   rank={index + 1}
-                  distance={getDistance(hospital.id)}
+                  distance={getDistance(hospital)}
                   isRecommended={recommendedIds.includes(hospital.id)}
                   onSelect={onHospitalSelect}
                 />
               ))
             ) : (
               <div className="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-sm text-[var(--color-text-muted)]">
-                Belum ada rekomendasi rumah sakit.
+                Belum ada rumah sakit untuk filter ini.
               </div>
             )}
           </div>

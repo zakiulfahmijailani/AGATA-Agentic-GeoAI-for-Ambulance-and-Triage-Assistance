@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
 import {
   Circle,
@@ -12,9 +12,20 @@ import {
   useMap,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { BED_STATUS_COLOR, BED_STATUS_LABEL, getBedStatus, Hospital } from '@/types';
+import {
+  ER_STATUS_COLOR,
+  ER_STATUS_LABEL,
+  Hospital,
+  HospitalFilters,
+  HospitalsApiResponse,
+} from '@/types';
+import FilterPanel from './FilterPanel';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+type LeafletDefaultIconPrototype = L.Icon.Default & {
+  _getIconUrl?: unknown;
+};
+
+delete (L.Icon.Default.prototype as LeafletDefaultIconPrototype)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/leaflet/marker-icon-2x.png',
   iconUrl: '/leaflet/marker-icon.png',
@@ -22,25 +33,31 @@ L.Icon.Default.mergeOptions({
 });
 
 interface MapViewProps {
-  hospitals: Hospital[];
+  filters: HospitalFilters;
   patientLocation: [number, number] | null;
-  recommendedIds: string[];
-  selectedHospitalId?: string | null;
+  recommendedIds: number[];
+  selectedHospitalId?: number | null;
+  onFiltersChange: (filters: HospitalFilters) => void;
   onHospitalClick?: (hospital: Hospital) => void;
+  onHospitalsChange?: (hospitals: Hospital[]) => void;
 }
 
 const DEFAULT_CENTER: [number, number] = [-6.2088, 106.8456];
-const DEFAULT_ZOOM = 11;
+const DEFAULT_ZOOM = 12;
 const CARTO_DARK_MATTER_URL =
   'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 const CARTO_ATTRIBUTION = '&copy; <a href="https://carto.com">CARTO</a>';
 
-function toLeafletLatLng([lng, lat]: [number, number]): [number, number] {
+function toLeafletLatLng(hospital: Hospital): [number, number] {
+  return [hospital.lat, hospital.lng];
+}
+
+function toPatientLatLng([lng, lat]: [number, number]): [number, number] {
   return [lat, lng];
 }
 
 function createHospitalIcon(hospital: Hospital, isRecommended: boolean): L.DivIcon {
-  const color = BED_STATUS_COLOR[getBedStatus(hospital)];
+  const color = ER_STATUS_COLOR[hospital.er_status];
   const size = isRecommended ? 40 : 30;
 
   return L.divIcon({
@@ -64,6 +81,15 @@ function createPatientIcon(): L.DivIcon {
   });
 }
 
+function buildHospitalsUrl(filters: HospitalFilters): string {
+  const params = new URLSearchParams();
+  if (filters.zone !== 'All') params.set('zone', filters.zone);
+  if (filters.traumaLevel !== 'All') params.set('trauma_level', String(filters.traumaLevel));
+  if (filters.erStatus !== 'All') params.set('er_status', filters.erStatus);
+  const query = params.toString();
+  return query ? `/api/hospitals?${query}` : '/api/hospitals';
+}
+
 function MapCamera({
   hospitals,
   patientLocation,
@@ -71,13 +97,13 @@ function MapCamera({
 }: {
   hospitals: Hospital[];
   patientLocation: [number, number] | null;
-  selectedHospitalId: string | null;
+  selectedHospitalId: number | null;
 }) {
   const map = useMap();
 
   useEffect(() => {
     if (!patientLocation) return;
-    map.flyTo(toLeafletLatLng(patientLocation), 13, { duration: 1.2 });
+    map.flyTo(toPatientLatLng(patientLocation), 13, { duration: 1.2 });
   }, [map, patientLocation]);
 
   useEffect(() => {
@@ -86,21 +112,60 @@ function MapCamera({
     const selectedHospital = hospitals.find((hospital) => hospital.id === selectedHospitalId);
     if (!selectedHospital) return;
 
-    map.flyTo(toLeafletLatLng(selectedHospital.coordinates), 14, { duration: 0.9 });
+    map.flyTo(toLeafletLatLng(selectedHospital), 14, { duration: 0.9 });
   }, [hospitals, map, selectedHospitalId]);
 
   return null;
 }
 
 export default function MapView({
-  hospitals,
+  filters,
   patientLocation,
   recommendedIds,
   selectedHospitalId = null,
+  onFiltersChange,
   onHospitalClick,
+  onHospitalsChange,
 }: MapViewProps) {
-  const recommendedHospitals = hospitals.filter((hospital) => recommendedIds.includes(hospital.id));
-  const patientLatLng = patientLocation ? toLeafletLatLng(patientLocation) : null;
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const recommendedHospitals = useMemo(
+    () => hospitals.filter((hospital) => recommendedIds.includes(hospital.id)),
+    [hospitals, recommendedIds],
+  );
+  const patientLatLng = patientLocation ? toPatientLatLng(patientLocation) : null;
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadHospitals() {
+      setIsLoading(true);
+      try {
+        const response = await fetch(buildHospitalsUrl(filters), {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error('Hospital API request failed');
+
+        const data = (await response.json()) as HospitalsApiResponse;
+        setHospitals(data.hospitals);
+        setTotal(data.total);
+        onHospitalsChange?.(data.hospitals);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setHospitals([]);
+          setTotal(0);
+          onHospitalsChange?.([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    void loadHospitals();
+
+    return () => controller.abort();
+  }, [filters, onHospitalsChange]);
 
   return (
     <section className="relative h-full flex-1 overflow-hidden bg-[#07101f]">
@@ -118,13 +183,12 @@ export default function MapView({
         />
 
         {hospitals.map((hospital) => {
-          const status = getBedStatus(hospital);
           const isRecommended = recommendedIds.includes(hospital.id);
 
           return (
             <Marker
               key={hospital.id}
-              position={toLeafletLatLng(hospital.coordinates)}
+              position={toLeafletLatLng(hospital)}
               icon={createHospitalIcon(hospital, isRecommended)}
               eventHandlers={{
                 click: () => onHospitalClick?.(hospital),
@@ -133,12 +197,13 @@ export default function MapView({
               <Popup>
                 <div className="space-y-1 text-sm">
                   <div className="font-bold">{hospital.name}</div>
-                  <div>{hospital.shortName}</div>
+                  <div>Zona {hospital.zone}</div>
+                  <div>Trauma Level {hospital.trauma_level}</div>
                   <div>
-                    {BED_STATUS_LABEL[status]} · {hospital.bedsAvailable}/{hospital.totalBeds}{' '}
-                    bed
+                    ER {ER_STATUS_LABEL[hospital.er_status]} - {hospital.available_beds}/
+                    {hospital.capacity} bed
                   </div>
-                  <div>{hospital.level}</div>
+                  {hospital.operator ? <div>{hospital.operator}</div> : null}
                 </div>
               </Popup>
             </Marker>
@@ -164,7 +229,7 @@ export default function MapView({
             {recommendedHospitals.map((hospital) => (
               <Polyline
                 key={`route-${hospital.id}`}
-                positions={[patientLatLng, toLeafletLatLng(hospital.coordinates)]}
+                positions={[patientLatLng, toLeafletLatLng(hospital)]}
                 pathOptions={{
                   color: '#14b8a6',
                   dashArray: '8 6',
@@ -177,16 +242,23 @@ export default function MapView({
         ) : null}
       </MapContainer>
 
+      <FilterPanel
+        filters={filters}
+        total={total}
+        isLoading={isLoading}
+        onChange={onFiltersChange}
+      />
+
       <div className="absolute bottom-5 left-5 z-[500] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-3 text-xs text-[var(--color-text)] shadow-xl shadow-black/20 backdrop-blur">
-        <div className="mb-2 font-semibold">Status Kapasitas</div>
+        <div className="mb-2 font-semibold">Status ER</div>
         <div className="space-y-1.5">
-          {(['available', 'limited', 'full'] as const).map((status) => (
+          {(['AVAILABLE', 'BUSY', 'FULL'] as const).map((status) => (
             <div key={status} className="flex items-center gap-2">
               <span
                 className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: BED_STATUS_COLOR[status] }}
+                style={{ backgroundColor: ER_STATUS_COLOR[status] }}
               />
-              <span>{BED_STATUS_LABEL[status]}</span>
+              <span>{ER_STATUS_LABEL[status]}</span>
             </div>
           ))}
         </div>

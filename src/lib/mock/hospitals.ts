@@ -1,6 +1,18 @@
-import { Hospital } from '@/types';
+interface LegacyMockHospital {
+  id: string;
+  name: string;
+  shortName: string;
+  coordinates: [number, number];
+  address: string;
+  zone: 'jakarta-pusat' | 'jakarta-selatan' | 'jakarta-timur' | 'jakarta-utara' | 'jakarta-barat';
+  bedsAvailable: number;
+  totalBeds: number;
+  specializations: string[];
+  phone: string;
+  level: 'Tipe A' | 'Tipe B' | 'Tipe C';
+}
 
-export const mockHospitals: Hospital[] = [
+export const mockHospitals: LegacyMockHospital[] = [
   // --- JAKARTA PUSAT ---------------------------------
   {
     id: 'rscm',

@@ -1,26 +1,50 @@
 export interface Hospital {
-  id: string;
+  id: number;
   name: string;
-  shortName: string;
-  coordinates: [number, number]; // [lng, lat]
   address: string;
-  zone:
-    | 'jakarta-pusat'
-    | 'jakarta-selatan'
-    | 'jakarta-timur'
-    | 'jakarta-utara'
-    | 'jakarta-barat';
-  bedsAvailable: number;
-  totalBeds: number;
-  specializations: string[];
   phone: string;
-  level: 'Tipe A' | 'Tipe B' | 'Tipe C';
+  zone: 'Pusat' | 'Selatan' | 'Timur' | 'Utara' | 'Barat';
+  lat: number;
+  lng: number;
+  capacity: number;
+  available_beds: number;
+  er_status: 'AVAILABLE' | 'BUSY' | 'FULL';
+  trauma_level: 1 | 2 | 3;
+  operator: string;
+  operator_type: string;
+  website: string;
+  osm_id: number;
+  distance_km?: number;
 }
 
 export type BedStatus = 'available' | 'limited' | 'full';
-// available: bedsAvailable >= 5
-// limited:   bedsAvailable 1-4
-// full:      bedsAvailable === 0
+export type ERStatus = Hospital['er_status'];
+export type ZoneFilter = 'All' | 'Pusat' | 'Selatan' | 'Timur' | 'Utara' | 'Barat';
+export type TraumaFilter = 'All' | 1 | 2 | 3;
+export type ERFilter = 'All' | 'AVAILABLE' | 'BUSY';
+
+export interface HospitalFilters {
+  zone: ZoneFilter;
+  traumaLevel: TraumaFilter;
+  erStatus: ERFilter;
+}
+
+export interface HospitalsApiResponse {
+  hospitals: Hospital[];
+  total: number;
+}
+
+export interface HealthApiResponse {
+  success: boolean;
+  status: string;
+  database?: string;
+  hospital_count?: number;
+  hospitals_count: number;
+  capacity: number;
+  available_beds: number;
+  postgis_version?: string;
+  timestamp: string;
+}
 
 export interface AgentStep {
   id: number;
@@ -51,8 +75,8 @@ export interface Message {
 }
 
 export function getBedStatus(hospital: Hospital): BedStatus {
-  if (hospital.bedsAvailable === 0) return 'full';
-  if (hospital.bedsAvailable < 5) return 'limited';
+  if (hospital.er_status === 'FULL') return 'full';
+  if (hospital.er_status === 'BUSY') return 'limited';
   return 'available';
 }
 
@@ -63,7 +87,19 @@ export const BED_STATUS_LABEL: Record<BedStatus, string> = {
 };
 
 export const BED_STATUS_COLOR: Record<BedStatus, string> = {
-  available: '#22c55e',
+  available: '#10b981',
   limited: '#f59e0b',
   full: '#ef4444',
+};
+
+export const ER_STATUS_LABEL: Record<ERStatus, string> = {
+  AVAILABLE: 'Available',
+  BUSY: 'Busy',
+  FULL: 'Full',
+};
+
+export const ER_STATUS_COLOR: Record<ERStatus, string> = {
+  AVAILABLE: '#10b981',
+  BUSY: '#f59e0b',
+  FULL: '#ef4444',
 };

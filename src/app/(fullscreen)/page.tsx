@@ -6,9 +6,7 @@ import { ChevronLeft, Cross, MapPinned } from 'lucide-react';
 import { AgentStatusBar, HospitalSidebar } from '@/components/webgis';
 import { defaultChatResponse, matchScenario } from '@/lib/mock/chatResponses';
 import { mockAgentSteps } from '@/lib/mock/agentSteps';
-import { mockHospitals } from '@/lib/mock/hospitals';
-import { getScenarioDistance } from '@/lib/mock/scenarioDistances';
-import type { Hospital, Message } from '@/types';
+import type { Hospital, HospitalFilters, Message } from '@/types';
 
 const MapView = dynamic(() => import('@/components/webgis/MapView'), {
   ssr: false,
@@ -30,21 +28,60 @@ const initialSystemMessage: Message = {
   timestamp: new Date(),
 };
 
+const defaultFilters: HospitalFilters = {
+  zone: 'All',
+  traumaLevel: 'All',
+  erStatus: 'All',
+};
+
+interface NearestHospitalsApiResponse {
+  hospitals?: Hospital[];
+  data?: Hospital[];
+}
+
 function createMessageId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function formatDistance(distance?: number): string {
+  return typeof distance === 'number' ? `${distance.toFixed(1)} km` : 'jarak belum tersedia';
+}
+
+function createNearestHospitalResponse(query: string, hospitals: Hospital[]): string {
+  if (!hospitals.length) {
+    return `Analisis selesai untuk "${query}", tetapi belum ada rumah sakit dalam radius pencarian yang bisa direkomendasikan dari data Neon.`;
+  }
+
+  const lines = hospitals.map((hospital, index) => {
+    return `${index + 1}. **${hospital.name}** - ${formatDistance(hospital.distance_km)} - TL${hospital.trauma_level} - ER ${hospital.er_status} - ${hospital.available_beds}/${hospital.capacity} bed tersedia`;
+  });
+
+  return `Analisis selesai untuk "${query}". Rekomendasi terdekat dari data 234 RS Jakarta:\n\n${lines.join('\n')}\n\nPeta sudah menandai lokasi pasien dan rumah sakit rekomendasi.`;
+}
+
+async function fetchNearestHospitals(patientLocation: [number, number]): Promise<Hospital[]> {
+  const [lng, lat] = patientLocation;
+  const response = await fetch(`/api/hospitals/nearest?lat=${lat}&lng=${lng}&limit=3`);
+
+  if (!response.ok) return [];
+
+  const data = (await response.json()) as NearestHospitalsApiResponse;
+  return data.hospitals ?? data.data ?? [];
+}
+
 export default function FullscreenDashboardPage() {
   const [messages, setMessages] = useState<Message[]>([initialSystemMessage]);
+  const [filters, setFilters] = useState<HospitalFilters>(defaultFilters);
+  const [visibleHospitals, setVisibleHospitals] = useState<Hospital[]>([]);
   const [patientLocation, setPatientLocation] = useState<[number, number] | null>(null);
-  const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
+  const [recommendedIds, setRecommendedIds] = useState<number[]>([]);
   const [recommendedHospitals, setRecommendedHospitals] = useState<Hospital[]>([]);
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [currentStepId, setCurrentStepId] = useState<number | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
+  const [selectedHospitalId, setSelectedHospitalId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const timersRef = useRef<number[]>([]);
 
@@ -60,6 +97,13 @@ export default function FullscreenDashboardPage() {
   const handleHospitalSelect = useCallback((hospital: Hospital) => {
     setSelectedHospitalId(hospital.id);
     setSidebarOpen(true);
+  }, []);
+
+  const handleFiltersChange = useCallback((nextFilters: HospitalFilters) => {
+    setFilters(nextFilters);
+    setRecommendedIds([]);
+    setRecommendedHospitals([]);
+    setSelectedHospitalId(null);
   }, []);
 
   const handleQuery = useCallback(
@@ -96,24 +140,22 @@ export default function FullscreenDashboardPage() {
       });
 
       const totalDuration = mockAgentSteps.reduce((sum, step) => sum + step.durationMs, 0);
-      const finishTimer = window.setTimeout(() => {
+      const finishTimer = window.setTimeout(async () => {
         const matchedScenario = matchScenario(input);
         let assistantMessage: Message;
 
         if (matchedScenario) {
-          const matchedHospitals = matchedScenario.recommendedHospitalIds
-            .map((hospitalId) => mockHospitals.find((hospital) => hospital.id === hospitalId))
-            .filter((hospital): hospital is Hospital => Boolean(hospital));
+          const matchedHospitals = await fetchNearestHospitals(matchedScenario.patientLocation);
 
           setPatientLocation(matchedScenario.patientLocation);
-          setRecommendedIds(matchedScenario.recommendedHospitalIds);
+          setRecommendedIds(matchedHospitals.map((hospital) => hospital.id));
           setRecommendedHospitals(matchedHospitals);
           setActiveScenarioId(matchedScenario.id);
 
           assistantMessage = {
             id: createMessageId('assistant'),
             role: 'assistant',
-            content: matchedScenario.chatResponse,
+            content: createNearestHospitalResponse(input, matchedHospitals),
             timestamp: new Date(),
             hospitals: matchedHospitals,
           };
@@ -176,11 +218,13 @@ export default function FullscreenDashboardPage() {
       <main className="relative flex min-h-0 flex-1 overflow-hidden">
         <div className="relative z-0 flex flex-1 bg-[#07101f]">
           <MapView
-            hospitals={mockHospitals}
+            filters={filters}
             patientLocation={patientLocation}
             recommendedIds={recommendedIds}
             selectedHospitalId={selectedHospitalId}
+            onFiltersChange={handleFiltersChange}
             onHospitalClick={handleHospitalSelect}
+            onHospitalsChange={setVisibleHospitals}
           />
         </div>
 
@@ -193,8 +237,9 @@ export default function FullscreenDashboardPage() {
             isLoading={isLoading}
             messages={messages}
             recommendedHospitals={recommendedHospitals}
+            visibleHospitals={visibleHospitals}
             recommendedIds={recommendedIds}
-            getDistance={(hospitalId) => getScenarioDistance(activeScenarioId, hospitalId)}
+            getDistance={(hospital) => hospital.distance_km ?? 0}
             onClose={() => setSidebarOpen(false)}
             onHospitalSelect={handleHospitalSelect}
             onQuery={handleQuery}

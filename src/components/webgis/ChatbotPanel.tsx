@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, UserRound } from 'lucide-react';
-import { Message } from '@/types';
+import type { Message } from '@/types';
 
 interface ChatbotPanelProps {
   messages: Message[];
@@ -75,9 +75,9 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
                     {message.hospitals.map((hospital, index) => (
                       <div key={hospital.id} className="flex items-center justify-between gap-2">
                         <span className="truncate">
-                          {index + 1}. {hospital.shortName}
+                          {index + 1}. {hospital.name}
                         </span>
-                        <span className="shrink-0">{hospital.bedsAvailable} bed</span>
+                        <span className="shrink-0">{hospital.available_beds} bed</span>
                       </div>
                     ))}
                   </div>
