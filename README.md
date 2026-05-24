@@ -30,7 +30,7 @@ User (Ambulance Dispatcher)
 ┌─────────────────────────────────────────────────────────┐
 │              LLM Orchestrator (OpenRouter)               │
 │         Translates requests → coordinates agents        │
-└──────┬──────────┬──────────────┬───────────────┬────────┘
+└──────┬──────────┬──────────────┬───────────────┘
        │          │              │               │
        ▼          ▼              ▼               ▼
 ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌───────────────┐
@@ -39,7 +39,9 @@ User (Ambulance Dispatcher)
 │  Agent   │ │  Agent   │ │    Agent     │ │    Agent      │
 └──────────┘ └──────────┘ └──────────────┘ └───────────────┘
        │          │              │               │
-       ▼          ▼              ▼               ▼
+       └──────────┴──────────────┴──────────────┘
+                       │
+                       ▼
 ┌─────────────────────────────────────────────────────────┐
 │          Data Layer: PostGIS + Pinecone + FastAPI        │
 └──────────────────────┬──────────────────────────────────┘
@@ -70,7 +72,8 @@ cp .env.example .env.local
 npm run dev
 
 # 5. Open browser
-# http://localhost:3000
+# http://localhost:3000          ← Landing page
+# http://localhost:3000/dashboard ← WebGIS Dashboard
 ```
 
 ---
@@ -78,26 +81,37 @@ npm run dev
 ## 📁 Project Structure
 
 ```
-src/
-├── app/
-│   ├── page.tsx                    # Landing page
-│   ├── dashboard/
-│   │   └── page.tsx                # Main WebGIS dashboard
-│   └── layout.tsx
-├── components/
-│   └── webgis/
-│       ├── MapView.tsx             # Mapbox GL map + hospital pins
-│       ├── ChatbotPanel.tsx        # Chat interface sidebar
-│       ├── AgentStatusBar.tsx      # 4-agent pipeline visualization
-│       ├── HospitalCard.tsx        # Hospital info card
-│       └── DashboardStats.tsx      # KPI summary cards
-├── lib/
-│   └── mock/
-│       ├── hospitals.ts            # Mock hospital GeoJSON data
-│       ├── chatResponses.ts        # Mock chatbot responses
-│       └── agentSteps.ts           # Mock agent pipeline steps
-└── types/
-    └── index.ts                    # TypeScript interfaces
+├── CODEX.md                        # Operational instructions for AI coding agents
+├── .env.example                    # Environment variable template
+├── docs/
+│   ├── AGENT_BRIEF.md              # Master brief: project context & MVP scope
+│   ├── TASKS.md                    # Agent execution checklist (26 tasks, 5 phases)
+│   ├── MOCK_DATA.md                # All mock data: 15 hospitals, 3 demo scenarios
+│   ├── UI_SPEC.md                  # UI/UX design spec: layout, colors, components
+│   └── ARCHITECTURE.md             # System architecture & design rationale
+└── src/
+    ├── app/
+    │   ├── page.tsx                # Landing page
+    │   ├── dashboard/
+    │   │   └── page.tsx            # Main WebGIS dashboard (3-panel layout)
+    │   └── layout.tsx
+    ├── components/
+    │   └── webgis/
+    │       ├── Topbar.tsx          # App header + AgentStatusBar + live clock
+    │       ├── MapView.tsx         # Mapbox GL map + hospital markers + routing
+    │       ├── ChatbotPanel.tsx    # Chat interface sidebar
+    │       ├── AgentStatusBar.tsx  # 4-agent pipeline visualization
+    │       ├── HospitalCard.tsx    # Hospital recommendation card
+    │       ├── KpiCard.tsx         # KPI summary card
+    │       └── index.ts            # Barrel export
+    ├── lib/
+    │   └── mock/
+    │       ├── hospitals.ts        # 15 mock hospitals, 5 Jakarta zones
+    │       ├── chatResponses.ts    # Demo scenarios + matchScenario()
+    │       ├── agentSteps.ts       # 4-agent pipeline mock steps
+    │       └── dashboardStats.ts   # KPI card static data
+    └── types/
+        └── index.ts                # TypeScript interfaces
 ```
 
 ---
@@ -106,11 +120,14 @@ src/
 
 | File | Description |
 |------|-------------|
-| [`docs/AGENT_BRIEF.md`](docs/AGENT_BRIEF.md) | **Master brief for AI coding agents** (Codex, Cursor, Claude) |
-| [`docs/MOCK_DATA.md`](docs/MOCK_DATA.md) | All mock data specifications |
-| [`docs/UI_SPEC.md`](docs/UI_SPEC.md) | UI/UX design specification |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture rationale |
-| [`CODEX.md`](CODEX.md) | Operational instructions for AI coding agents |
+| [`CODEX.md`](CODEX.md) | Operational instructions for AI coding agents (read first) |
+| [`docs/AGENT_BRIEF.md`](docs/AGENT_BRIEF.md) | Master brief: project context, MVP scope, tech stack |
+| [`docs/TASKS.md`](docs/TASKS.md) | **Agent execution checklist** — 26 tasks in 5 phases |
+| [`docs/MOCK_DATA.md`](docs/MOCK_DATA.md) | All mock data: 15 hospitals, demo scenarios, agent steps |
+| [`docs/UI_SPEC.md`](docs/UI_SPEC.md) | UI/UX design: layout, colors, components, animations |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture rationale & component relationships |
+
+> 🤖 **For AI coding agents**: Start with `CODEX.md` → `docs/AGENT_BRIEF.md` → `docs/TASKS.md`
 
 ---
 
@@ -120,7 +137,7 @@ src/
 - **International Partner:** Cardiff University (OR Group) — Syaribah Noor Brice, Prof. Daniel Gartner
 - **SDGs:** SDG 3 (Good Health), SDG 9 (Innovation), SDG 11 (Sustainable Cities)
 - **Phase:** TRL 3 — Proof of Concept (2025–2026)
-- **Tech Stack:** Next.js · TypeScript · Tailwind CSS · Mapbox GL JS · FastAPI · PostGIS · Pinecone
+- **Tech Stack:** Next.js · TypeScript · Tailwind CSS · Mapbox GL JS
 
 ---
 
