@@ -25,15 +25,15 @@ const erOptions: Array<{ value: ERFilter; label: string }> = [
 
 export default function FilterPanel({ filters, total, isLoading = false, onChange }: FilterPanelProps) {
   return (
-    <div className="absolute left-5 top-5 z-[500] w-[min(560px,calc(100%-2.5rem))] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/95 p-3 text-[var(--color-text)] shadow-xl shadow-black/20 backdrop-blur">
+    <div className="absolute left-5 top-5 z-[500] w-[min(560px,calc(100%-2.5rem))] rounded-lg border border-[var(--color-border)] bg-card p-3 text-[var(--color-text-primary)] shadow-md">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <MapPinned className="h-4 w-4 text-[var(--color-teal)]" />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <MapPinned className="h-4 w-4 text-teal" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
             Filter RS Jakarta
           </span>
         </div>
-        <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-1 text-xs font-semibold text-[var(--color-text-muted)]">
+        <span className="rounded-full bg-surface px-2 py-1 text-xs font-semibold text-[var(--color-text-secondary)]">
           {isLoading ? 'Memuat...' : `${total} RS`}
         </span>
       </div>
@@ -96,7 +96,7 @@ function FilterGroup({
 }) {
   return (
     <div className="space-y-1.5">
-      <span className="flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
+      <span className="flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
         {icon}
         {label}
       </span>
@@ -118,10 +118,10 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-md border px-2 py-1 text-[0.68rem] font-semibold transition ${
+      className={`rounded-md border px-2 py-1 text-[0.68rem] font-semibold transition-colors duration-150 ${
         isActive
-          ? 'border-teal-300 bg-teal-400/15 text-teal-100'
-          : 'border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:border-sky-400/60 hover:text-[var(--color-text)]'
+          ? 'border-teal bg-teal text-white'
+          : 'border-[var(--color-border)] bg-card text-[var(--color-text-secondary)] hover:border-teal/50 hover:bg-surface hover:text-[var(--color-text-primary)]'
       }`}
     >
       {children}

@@ -44,9 +44,10 @@ interface MapViewProps {
 
 const DEFAULT_CENTER: [number, number] = [-6.2088, 106.8456];
 const DEFAULT_ZOOM = 12;
-const CARTO_DARK_MATTER_URL =
-  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-const CARTO_ATTRIBUTION = '&copy; <a href="https://carto.com">CARTO</a>';
+const CARTO_POSITRON_URL =
+  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const CARTO_ATTRIBUTION =
+  '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>';
 
 function toLeafletLatLng(hospital: Hospital): [number, number] {
   return [hospital.lat, hospital.lng];
@@ -168,14 +169,14 @@ export default function MapView({
   }, [filters, onHospitalsChange]);
 
   return (
-    <section className="relative h-full flex-1 overflow-hidden bg-[#07101f]">
+    <section className="relative h-full flex-1 overflow-hidden bg-surface">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
         zoomControl
         className="h-full w-full"
       >
-        <TileLayer url={CARTO_DARK_MATTER_URL} attribution={CARTO_ATTRIBUTION} />
+        <TileLayer url={CARTO_POSITRON_URL} attribution={CARTO_ATTRIBUTION} />
         <MapCamera
           hospitals={hospitals}
           patientLocation={patientLocation}
@@ -216,8 +217,8 @@ export default function MapView({
               center={patientLatLng}
               radius={5000}
               pathOptions={{
-                color: '#0ea5e9',
-                fillColor: '#0ea5e9',
+                  color: '#00B4B4',
+                  fillColor: '#00B4B4',
                 fillOpacity: 0.12,
                 opacity: 0.8,
                 weight: 1.5,
@@ -231,7 +232,7 @@ export default function MapView({
                 key={`route-${hospital.id}`}
                 positions={[patientLatLng, toLeafletLatLng(hospital)]}
                 pathOptions={{
-                  color: '#14b8a6',
+                  color: '#00B4B4',
                   dashArray: '8 6',
                   opacity: 0.9,
                   weight: 2,
@@ -249,7 +250,7 @@ export default function MapView({
         onChange={onFiltersChange}
       />
 
-      <div className="absolute bottom-5 left-5 z-[500] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-3 text-xs text-[var(--color-text)] shadow-xl shadow-black/20 backdrop-blur">
+      <div className="info legend absolute bottom-5 left-5 z-[500] rounded-lg border border-[var(--color-border)] bg-card p-3 text-xs text-[var(--color-text-primary)] shadow-md">
         <div className="mb-2 font-semibold">Status ER</div>
         <div className="space-y-1.5">
           {(['AVAILABLE', 'BUSY', 'FULL'] as const).map((status) => (

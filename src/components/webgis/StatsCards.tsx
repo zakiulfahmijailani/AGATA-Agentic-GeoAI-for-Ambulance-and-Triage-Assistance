@@ -11,10 +11,10 @@ interface StatCard {
 }
 
 const fallbackStats: StatCard[] = [
-  { value: '-', label: 'RS Terjangkau', unit: 'rumah sakit', color: '#0ea5e9' },
-  { value: '-', label: 'Kapasitas Bebas', unit: 'dari total', color: '#22c55e' },
-  { value: '-', label: 'Kapasitas Total', unit: 'estimasi bed', color: '#14b8a6' },
-  { value: '-', label: 'Database', unit: 'Neon + PostGIS', color: '#818cf8' },
+  { value: '-', label: 'RS Terjangkau', unit: 'rumah sakit', color: '#00B4B4' },
+  { value: '-', label: 'Kapasitas Bebas', unit: 'dari total', color: '#00B4B4' },
+  { value: '-', label: 'Kapasitas Total', unit: 'estimasi bed', color: '#00B4B4' },
+  { value: '-', label: 'Database', unit: 'Neon + PostGIS', color: '#00B4B4' },
 ];
 
 export default function StatsCards() {
@@ -53,47 +53,49 @@ export default function StatsCards() {
         value: String(health.hospitals_count ?? health.hospital_count ?? 0),
         label: 'RS Terjangkau',
         unit: 'rumah sakit',
-        color: '#0ea5e9',
+        color: '#00B4B4',
       },
       {
         value: `${availabilityPercent}%`,
         label: 'Kapasitas Bebas',
         unit: 'dari total',
-        color: '#22c55e',
+        color: '#00B4B4',
       },
       {
         value: availableBeds.toLocaleString('id-ID'),
         label: 'Bed Tersedia',
         unit: `${capacity.toLocaleString('id-ID')} total`,
-        color: '#14b8a6',
+        color: '#00B4B4',
       },
       {
         value: health.status === 'connected' ? 'Live' : 'Offline',
         label: 'Database',
         unit: 'Neon + PostGIS',
-        color: '#818cf8',
+        color: '#00B4B4',
       },
     ];
   }, [health]);
 
   return (
     <section>
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/80">
         Ringkasan Operasional
       </h3>
       <div className="grid grid-cols-2 gap-3">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3 shadow-sm"
+            className="rounded-lg border border-[var(--color-border)] bg-card p-3 shadow-md"
           >
             <div className="text-2xl font-bold leading-none" style={{ color: stat.color }}>
               {stat.value}
             </div>
-            <div className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+            <div className="mt-2 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
               {stat.label}
             </div>
-            <div className="mt-1 text-[0.68rem] text-[var(--color-text-faint)]">{stat.unit}</div>
+            <div className="mt-1 text-[0.68rem] text-[var(--color-text-secondary)]">
+              {stat.unit}
+            </div>
           </div>
         ))}
       </div>

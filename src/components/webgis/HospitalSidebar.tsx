@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { BarChart2, Bot, ChevronRight, Hospital, ListChecks, MessageCircle, Send } from 'lucide-react';
+import { BarChart2, Bot, ChevronLeft, Hospital, ListChecks, MessageCircle, Send } from 'lucide-react';
 import type { Hospital as HospitalType, Message } from '@/types';
 import HospitalCard from './HospitalCard';
 import StatsCards from './StatsCards';
@@ -67,23 +67,23 @@ export default function HospitalSidebar({
     : visibleHospitals.slice(0, 10);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--color-surface)]">
-      <div className="flex h-12 shrink-0 items-center justify-between bg-[#0f172a] px-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Hospital className="h-4 w-4 text-[var(--color-teal)]" />
-          Hospital Panel
+    <div className="flex h-full w-full flex-col bg-navy text-white">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-3">
+        <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-white">
+          <Hospital className="h-4 w-4 shrink-0 text-teal" />
+          <span className="truncate">Hospital Panel</span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md p-1 text-slate-300 transition hover:bg-white/10 hover:text-white"
+          className="rounded-md p-1 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
           aria-label="Tutup panel"
         >
-          <ChevronRight className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
       </div>
 
-      <div className="flex shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="shrink-0 space-y-1 border-b border-white/10 p-3">
         <TabButton
           icon={<BarChart2 className="h-4 w-4" />}
           label="Stats"
@@ -104,16 +104,16 @@ export default function HospitalSidebar({
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto p-3">
         {activeTab === 'stats' ? <StatsCards /> : null}
 
         {activeTab === 'hospitals' ? (
           <div className="space-y-3">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-white/80">
                 {hasRecommendations ? 'Rekomendasi RS' : 'RS Terfilter'}
               </h3>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+              <p className="mt-1 text-xs text-white/60">
                 {hasRecommendations
                   ? `Skenario aktif: ${activeScenarioId ?? 'simulasi'}`
                   : 'Daftar mengikuti filter yang aktif di peta.'}
@@ -131,7 +131,7 @@ export default function HospitalSidebar({
                 />
               ))
             ) : (
-              <div className="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-sm text-[var(--color-text-muted)]">
+              <div className="rounded-lg border border-[var(--color-border)] bg-card p-4 text-sm text-[var(--color-text-secondary)] shadow-md">
                 Belum ada rumah sakit untuk filter ini.
               </div>
             )}
@@ -141,12 +141,12 @@ export default function HospitalSidebar({
         {activeTab === 'chat' ? (
           <div className="flex min-h-full flex-col">
             <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-primary-glow)] text-[var(--color-primary)]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-navy-light text-teal">
                 <Bot className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-[var(--color-text)]">Asisten AGATA</h3>
-                <p className="text-xs text-[var(--color-text-muted)]">GeoAI dispatch support</p>
+                <h3 className="text-sm font-bold text-white">Asisten AGATA</h3>
+                <p className="text-xs text-white/60">GeoAI dispatch support</p>
               </div>
             </div>
 
@@ -157,10 +157,10 @@ export default function HospitalSidebar({
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[260px] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                    className={`max-w-[190px] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                       message.role === 'user'
-                        ? 'bg-[var(--color-primary)] text-white'
-                        : 'bg-[var(--color-surface-2)] text-[var(--color-text)]'
+                        ? 'bg-teal text-white'
+                        : 'border border-[var(--color-border)] bg-card text-[var(--color-text-primary)]'
                     }`}
                   >
                     <div className="chat-markdown max-w-none">
@@ -172,11 +172,11 @@ export default function HospitalSidebar({
 
               {isLoading ? (
                 <div className="flex justify-start">
-                  <div className="flex items-center gap-1 rounded-lg bg-[var(--color-surface-2)] px-3 py-2">
+                  <div className="flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-card px-3 py-2">
                     {[0, 1, 2].map((dot) => (
                       <span
                         key={dot}
-                        className="h-2 w-2 rounded-full bg-[var(--color-teal)]"
+                        className="h-2 w-2 rounded-full bg-teal"
                         style={{
                           animation: `typingBounce 0.9s ${dot * 0.12}s infinite ease-in-out`,
                         }}
@@ -191,14 +191,14 @@ export default function HospitalSidebar({
         ) : null}
       </div>
 
-      <div className="shrink-0 border-t border-[var(--color-border)] p-4">
+      <div className="shrink-0 border-t border-white/10 p-3">
         <div className="mb-3 flex flex-wrap gap-2">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion}
               type="button"
               onClick={() => setInputValue(suggestion)}
-              className="rounded-full border border-teal-400/40 px-3 py-1 text-xs font-medium text-teal-200 transition hover:bg-teal-400/10"
+              className="rounded-full border border-white/15 px-2.5 py-1 text-xs font-medium text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
             >
               {suggestion}
             </button>
@@ -209,12 +209,12 @@ export default function HospitalSidebar({
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
             placeholder="Masukkan lokasi pasien..."
-            className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-sky-400"
+            className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)] text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-teal text-white transition-colors duration-150 hover:bg-teal-muted disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Kirim"
           >
             <Send className="h-4 w-4" />
@@ -240,16 +240,12 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 border-b-2 px-3 py-3 text-xs font-semibold transition ${
-        isActive
-          ? 'border-[var(--color-teal)] text-[var(--color-teal)]'
-          : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+      className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+        isActive ? 'bg-teal text-white' : 'text-white/70 hover:bg-navy-light hover:text-white'
       }`}
     >
-      <span className="flex flex-col items-center gap-1">
-        {icon}
-        {label}
-      </span>
+      {icon}
+      {label}
     </button>
   );
 }

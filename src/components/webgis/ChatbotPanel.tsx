@@ -34,15 +34,15 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
   }
 
   return (
-    <aside className="flex h-full w-80 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]">
+    <aside className="flex h-full w-80 shrink-0 flex-col border-r border-[var(--color-border)] bg-card">
       <div className="border-b border-[var(--color-border)] px-4 py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-primary-glow)] text-[var(--color-primary)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-teal/10 text-teal">
             <Bot className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-[var(--color-text)]">Asisten AGATA</h2>
-            <p className="text-xs text-[var(--color-text-muted)]">GeoAI dispatch support</p>
+            <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Asisten AGATA</h2>
+            <p className="text-xs text-[var(--color-text-secondary)]">GeoAI dispatch support</p>
           </div>
         </div>
       </div>
@@ -56,22 +56,22 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
               className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser ? (
-                <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-[var(--color-teal)]">
+                <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
               ) : null}
               <div
                 className={`max-w-[240px] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                   isUser
-                    ? 'bg-[var(--color-primary)] text-white'
-                    : 'bg-[var(--color-surface-2)] text-[var(--color-text)]'
+                    ? 'bg-teal text-white'
+                    : 'border border-[var(--color-border)] bg-card text-[var(--color-text-primary)]'
                 }`}
               >
                 <div className="chat-markdown max-w-none">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
                 {message.hospitals?.length ? (
-                  <div className="mt-3 space-y-1 border-t border-white/10 pt-2 text-xs text-[var(--color-text-muted)]">
+                  <div className="mt-3 space-y-1 border-t border-[var(--color-border)] pt-2 text-xs text-[var(--color-text-secondary)]">
                     {message.hospitals.map((hospital, index) => (
                       <div key={hospital.id} className="flex items-center justify-between gap-2">
                         <span className="truncate">
@@ -84,7 +84,7 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
                 ) : null}
               </div>
               {isUser ? (
-                <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-sky-300">
+                <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
                   <UserRound className="h-3.5 w-3.5" />
                 </div>
               ) : null}
@@ -94,14 +94,14 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
 
         {isLoading ? (
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-[var(--color-teal)]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal/10 text-teal">
               <Bot className="h-3.5 w-3.5" />
             </div>
-            <div className="flex items-center gap-1 rounded-lg bg-[var(--color-surface-2)] px-3 py-2">
+            <div className="flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-card px-3 py-2">
               {[0, 1, 2].map((dot) => (
                 <span
                   key={dot}
-                  className="h-2 w-2 rounded-full bg-[var(--color-teal)]"
+                  className="h-2 w-2 rounded-full bg-teal"
                   style={{ animation: `typingBounce 0.9s ${dot * 0.12}s infinite ease-in-out` }}
                 />
               ))}
@@ -118,7 +118,7 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
               key={suggestion}
               type="button"
               onClick={() => setInputValue(suggestion)}
-              className="rounded-full border border-teal-400/40 px-3 py-1 text-xs font-medium text-teal-200 transition hover:bg-teal-400/10"
+              className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)] transition-colors duration-150 hover:bg-surface hover:text-[var(--color-text-primary)]"
             >
               {suggestion}
             </button>
@@ -129,12 +129,12 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
             placeholder="Masukkan lokasi pasien..."
-            className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-sky-400"
+            className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)] text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-teal text-white transition-colors duration-150 hover:bg-teal-muted disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Kirim"
           >
             <Send className="h-4 w-4" />

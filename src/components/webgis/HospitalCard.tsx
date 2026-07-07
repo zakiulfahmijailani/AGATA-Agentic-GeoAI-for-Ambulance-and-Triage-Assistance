@@ -11,12 +11,6 @@ interface HospitalCardProps {
   onSelect?: (hospital: Hospital) => void;
 }
 
-const rankColors: Record<number, string> = {
-  1: '#fbbf24',
-  2: '#cbd5e1',
-  3: '#d97706',
-};
-
 export default function HospitalCard({
   hospital,
   rank,
@@ -30,23 +24,19 @@ export default function HospitalCard({
 
   return (
     <article
-      className="animate-slide-in-right rounded-lg border bg-[var(--color-surface)] p-4 shadow-xl shadow-black/10"
-      style={{
-        borderColor: isRecommended
-          ? `${ER_STATUS_COLOR[hospital.er_status]}66`
-          : 'var(--color-border)',
-      }}
+      className={`animate-slide-in-right rounded-lg border bg-card p-3 shadow-md transition-all duration-150 hover:border-teal/50 hover:shadow-md ${
+        isRecommended ? 'border-teal bg-teal/5' : 'border-[var(--color-border)]'
+      }`}
     >
       <div className="flex items-start gap-3">
-        <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-slate-950"
-          style={{ backgroundColor: rankColors[rank] ?? '#94a3b8' }}
-        >
-          #{rank}
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal text-xs font-bold text-white">
+          {rank}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-bold text-[var(--color-text)]">{hospital.name}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)]">
+          <h3 className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+            {hospital.name}
+          </h3>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
               {hospital.zone}
@@ -69,28 +59,28 @@ export default function HospitalCard({
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-[0.68rem] font-bold uppercase">
-        <span className="rounded-full bg-sky-500/15 px-2 py-1 text-sky-200">
+        <span className="rounded-full bg-teal/10 px-2 py-1 text-teal">
           Zona {hospital.zone}
         </span>
-        <span className="rounded-full bg-teal-500/15 px-2 py-1 text-teal-200">
+        <span className="rounded-full bg-teal/10 px-2 py-1 text-teal">
           TL{hospital.trauma_level}
         </span>
         {hospital.operator_type ? (
-          <span className="rounded-full bg-slate-500/15 px-2 py-1 text-slate-300">
+          <span className="rounded-full border border-[var(--color-border)] bg-surface px-2 py-1 text-[var(--color-text-secondary)]">
             {hospital.operator_type}
           </span>
         ) : null}
       </div>
 
       <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+        <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
           <span className="inline-flex items-center gap-1">
             <BedDouble className="h-3.5 w-3.5" />
             {hospital.available_beds} / {hospital.capacity} tersedia
           </span>
           <span>{hospital.phone || 'No phone'}</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+        <div className="h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
           <div
             className="h-full rounded-full"
             style={{
@@ -101,7 +91,7 @@ export default function HospitalCard({
         </div>
       </div>
 
-      <div className="mt-3 space-y-1 text-xs text-[var(--color-text-muted)]">
+      <div className="mt-3 space-y-1 text-xs text-[var(--color-text-secondary)]">
         <p className="line-clamp-2">{hospital.address}</p>
         {hospital.operator ? <p>Operator: {hospital.operator}</p> : null}
         {hospital.website ? (
@@ -109,7 +99,7 @@ export default function HospitalCard({
             href={hospital.website}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200"
+            className="inline-flex items-center gap-1 text-teal transition-colors duration-150 hover:text-teal-muted"
           >
             Website
             <ExternalLink className="h-3 w-3" />
@@ -121,7 +111,7 @@ export default function HospitalCard({
         <button
           type="button"
           onClick={() => onSelect(hospital)}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-teal-muted focus:outline-none focus:ring-2 focus:ring-teal"
         >
           <MapPin className="h-4 w-4" />
           Lihat di Peta

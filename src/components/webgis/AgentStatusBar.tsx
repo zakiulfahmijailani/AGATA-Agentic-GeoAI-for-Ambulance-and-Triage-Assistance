@@ -20,14 +20,15 @@ export default function AgentStatusBar({
   const activeStep = steps.find((step) => step.id === currentStepId) ?? null;
 
   return (
-    <div className="flex h-9 w-full shrink-0 items-center justify-between border-b border-slate-700 bg-slate-950 px-4 text-xs text-slate-300">
+    <div className="flex h-9 w-full shrink-0 items-center justify-between border-b border-white/10 bg-navy-light px-4 text-xs text-white/70">
       <div className="flex items-center gap-2">
         <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
         </span>
-        <span>
-          AGATA Agent · <span className="font-semibold text-green-400">Active</span>
+        <span className="text-white/80">
+          AGATA Agent <span className="mx-1 text-white/30">-</span>
+          <span className="rounded-full bg-teal/20 px-2 py-0.5 font-medium text-teal">Active</span>
         </span>
       </div>
 
@@ -38,7 +39,7 @@ export default function AgentStatusBar({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
-            className="hidden items-center gap-2 text-emerald-300 sm:inline-flex"
+            className="hidden items-center gap-2 text-green-400 sm:inline-flex"
           >
             <CheckCircle2 className="h-4 w-4" />
             <span className="font-semibold">Analisis Selesai</span>
@@ -49,23 +50,19 @@ export default function AgentStatusBar({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
-            className="hidden max-w-[48vw] items-center gap-2 truncate sm:inline-flex"
-            style={{ color: activeStep.color }}
+            className="hidden max-w-[48vw] items-center gap-2 truncate text-teal sm:inline-flex"
           >
             <span className="flex h-4 w-4 items-center justify-center gap-0.5">
               {[0, 1, 2].map((dot) => (
                 <span
                   key={dot}
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{
-                    backgroundColor: activeStep.color,
-                    animation: `typingBounce 0.9s ${dot * 0.12}s infinite ease-in-out`,
-                  }}
+                  className="h-1.5 w-1.5 rounded-full bg-teal"
+                  style={{ animation: `typingBounce 0.9s ${dot * 0.12}s infinite ease-in-out` }}
                 />
               ))}
             </span>
             <span className="truncate">
-              {activeStep.name} · {activeStep.description}
+              {activeStep.name} - {activeStep.description}
             </span>
           </motion.div>
         ) : (
@@ -74,15 +71,15 @@ export default function AgentStatusBar({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
-            className="hidden items-center gap-2 text-slate-400 sm:inline-flex"
+            className="hidden items-center gap-2 text-white/60 sm:inline-flex"
           >
-            <RadioTower className="h-4 w-4 text-[var(--color-teal)]" />
+            <RadioTower className="h-4 w-4 text-teal" />
             <span>Pipeline siap menerima lokasi pasien</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="font-mono text-slate-400">
+      <div className="font-mono text-white/60">
         {currentStepId ? `Step ${currentStepId}/${steps.length}` : 'Standby'}
       </div>
     </div>
