@@ -9,7 +9,7 @@ interface LegacyMockHospital {
   totalBeds: number;
   specializations: string[];
   phone: string;
-  level: 'Tipe A' | 'Tipe B' | 'Tipe C';
+  level: 'Type A' | 'Type B' | 'Type C';
 }
 
 export const mockHospitals: LegacyMockHospital[] = [
@@ -23,9 +23,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-pusat',
     bedsAvailable: 12,
     totalBeds: 60,
-    specializations: ['IGD 24 Jam', 'Trauma', 'Jantung', 'Neurologi'],
+    specializations: ['24-hour ER', 'Trauma', 'Cardiology', 'Neurology'],
     phone: '021-500135',
-    level: 'Tipe A',
+    level: 'Type A',
   },
   {
     id: 'rs-islam-jakarta',
@@ -36,9 +36,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-pusat',
     bedsAvailable: 8,
     totalBeds: 40,
-    specializations: ['IGD 24 Jam', 'Bedah', 'Kebidanan'],
+    specializations: ['24-hour ER', 'Surgery', 'Obstetrics'],
     phone: '021-4244208',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rs-cempaka-putih',
@@ -49,9 +49,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-pusat',
     bedsAvailable: 0,
     totalBeds: 50,
-    specializations: ['IGD 24 Jam', 'Bedah', 'Kardiologi'],
+    specializations: ['24-hour ER', 'Surgery', 'Cardiology'],
     phone: '021-3441008',
-    level: 'Tipe A',
+    level: 'Type A',
   },
   // --- JAKARTA SELATAN -------------------------------
   {
@@ -63,9 +63,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-selatan',
     bedsAvailable: 15,
     totalBeds: 55,
-    specializations: ['IGD 24 Jam', 'Orthopedi', 'Paru'],
+    specializations: ['24-hour ER', 'Orthopedics', 'Pulmonology'],
     phone: '021-7660552',
-    level: 'Tipe A',
+    level: 'Type A',
   },
   {
     id: 'rs-brawijaya',
@@ -76,9 +76,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-selatan',
     bedsAvailable: 3,
     totalBeds: 30,
-    specializations: ['IGD 24 Jam', 'Bedah', 'Penyakit Dalam'],
+    specializations: ['24-hour ER', 'Surgery', 'Internal Medicine'],
     phone: '021-8314841',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rs-mmc',
@@ -89,9 +89,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-selatan',
     bedsAvailable: 7,
     totalBeds: 35,
-    specializations: ['IGD 24 Jam', 'Kardiologi', 'Onkologi'],
+    specializations: ['24-hour ER', 'Cardiology', 'Oncology'],
     phone: '021-5203435',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   // --- JAKARTA TIMUR ---------------------------------
   {
@@ -103,9 +103,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-timur',
     bedsAvailable: 10,
     totalBeds: 45,
-    specializations: ['IGD 24 Jam', 'Bedah', 'Penyakit Dalam'],
+    specializations: ['24-hour ER', 'Surgery', 'Internal Medicine'],
     phone: '021-8400109',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rs-premier-jatinegara',
@@ -116,9 +116,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-timur',
     bedsAvailable: 5,
     totalBeds: 40,
-    specializations: ['IGD 24 Jam', 'Kardiologi', 'Neurologi'],
+    specializations: ['24-hour ER', 'Cardiology', 'Neurology'],
     phone: '021-2800900',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rsud-budhi-asih',
@@ -129,9 +129,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-timur',
     bedsAvailable: 2,
     totalBeds: 35,
-    specializations: ['IGD 24 Jam', 'Bedah'],
+    specializations: ['24-hour ER', 'Surgery'],
     phone: '021-8093208',
-    level: 'Tipe C',
+    level: 'Type C',
   },
   // --- JAKARTA UTARA ---------------------------------
   {
@@ -143,9 +143,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-utara',
     bedsAvailable: 9,
     totalBeds: 42,
-    specializations: ['IGD 24 Jam', 'Kardiologi', 'Bedah'],
+    specializations: ['24-hour ER', 'Cardiology', 'Surgery'],
     phone: '021-45841234',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rs-mitra-keluarga-kelapa-gading',
@@ -156,9 +156,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-utara',
     bedsAvailable: 6,
     totalBeds: 38,
-    specializations: ['IGD 24 Jam', 'Penyakit Dalam', 'Kebidanan'],
+    specializations: ['24-hour ER', 'Internal Medicine', 'Obstetrics'],
     phone: '021-45866000',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rsud-koja',
@@ -169,9 +169,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-utara',
     bedsAvailable: 0,
     totalBeds: 30,
-    specializations: ['IGD 24 Jam', 'Penyakit Dalam'],
+    specializations: ['24-hour ER', 'Internal Medicine'],
     phone: '021-4350580',
-    level: 'Tipe C',
+    level: 'Type C',
   },
   // --- JAKARTA BARAT ---------------------------------
   {
@@ -183,9 +183,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-barat',
     bedsAvailable: 11,
     totalBeds: 50,
-    specializations: ['IGD 24 Jam', 'Neurologi', 'Bedah'],
+    specializations: ['24-hour ER', 'Neurology', 'Surgery'],
     phone: '021-5682011',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rs-siloam-kebon-jeruk',
@@ -196,9 +196,9 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-barat',
     bedsAvailable: 4,
     totalBeds: 32,
-    specializations: ['IGD 24 Jam', 'Kardiologi', 'Onkologi'],
+    specializations: ['24-hour ER', 'Cardiology', 'Oncology'],
     phone: '021-53000222',
-    level: 'Tipe B',
+    level: 'Type B',
   },
   {
     id: 'rsud-cengkareng',
@@ -209,8 +209,8 @@ export const mockHospitals: LegacyMockHospital[] = [
     zone: 'jakarta-barat',
     bedsAvailable: 14,
     totalBeds: 48,
-    specializations: ['IGD 24 Jam', 'Trauma', 'Kebidanan'],
+    specializations: ['24-hour ER', 'Trauma', 'Obstetrics'],
     phone: '021-5435555',
-    level: 'Tipe B',
+    level: 'Type B',
   },
 ];

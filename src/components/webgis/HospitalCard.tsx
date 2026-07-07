@@ -1,7 +1,7 @@
 'use client';
 
 import { BedDouble, ExternalLink, MapPin, Navigation } from 'lucide-react';
-import { ER_STATUS_COLOR, ER_STATUS_LABEL, type Hospital } from '@/types';
+import { ER_STATUS_COLOR, ER_STATUS_LABEL, ZONE_LABEL, type Hospital } from '@/types';
 
 interface HospitalCardProps {
   hospital: Hospital;
@@ -39,7 +39,7 @@ export default function HospitalCard({
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
-              {hospital.zone}
+              {ZONE_LABEL[hospital.zone]}
             </span>
             <span className="inline-flex items-center gap-1">
               <Navigation className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ export default function HospitalCard({
 
       <div className="mt-3 flex flex-wrap gap-2 text-[0.68rem] font-bold uppercase">
         <span className="rounded-full bg-teal/10 px-2 py-1 text-teal">
-          Zona {hospital.zone}
+          Zone {ZONE_LABEL[hospital.zone]}
         </span>
         <span className="rounded-full bg-teal/10 px-2 py-1 text-teal">
           TL{hospital.trauma_level}
@@ -76,7 +76,7 @@ export default function HospitalCard({
         <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
           <span className="inline-flex items-center gap-1">
             <BedDouble className="h-3.5 w-3.5" />
-            {hospital.available_beds} / {hospital.capacity} tersedia
+            {hospital.available_beds} / {hospital.capacity} available
           </span>
           <span>{hospital.phone || 'No phone'}</span>
         </div>
@@ -114,7 +114,7 @@ export default function HospitalCard({
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-teal-muted focus:outline-none focus:ring-2 focus:ring-teal"
         >
           <MapPin className="h-4 w-4" />
-          Lihat di Peta
+          View on Map
         </button>
       ) : null}
     </article>

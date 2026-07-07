@@ -42,7 +42,7 @@ export default function AgentStatusBar({
             className="hidden items-center gap-2 text-green-400 sm:inline-flex"
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span className="font-semibold">Analisis Selesai</span>
+            <span className="font-semibold">Analysis Complete</span>
           </motion.div>
         ) : isRunning && activeStep ? (
           <motion.div
@@ -74,7 +74,7 @@ export default function AgentStatusBar({
             className="hidden items-center gap-2 text-white/60 sm:inline-flex"
           >
             <RadioTower className="h-4 w-4 text-teal" />
-            <span>Pipeline siap menerima lokasi pasien</span>
+            <span>Pipeline ready for patient location</span>
           </motion.div>
         )}
       </AnimatePresence>

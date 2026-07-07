@@ -11,9 +11,9 @@ interface StatCard {
 }
 
 const fallbackStats: StatCard[] = [
-  { value: '-', label: 'RS Terjangkau', unit: 'rumah sakit', color: '#00B4B4' },
-  { value: '-', label: 'Kapasitas Bebas', unit: 'dari total', color: '#00B4B4' },
-  { value: '-', label: 'Kapasitas Total', unit: 'estimasi bed', color: '#00B4B4' },
+  { value: '-', label: 'Reachable Hospitals', unit: 'hospitals', color: '#00B4B4' },
+  { value: '-', label: 'Available Capacity', unit: 'of total', color: '#00B4B4' },
+  { value: '-', label: 'Total Capacity', unit: 'estimated beds', color: '#00B4B4' },
   { value: '-', label: 'Database', unit: 'Neon + PostGIS', color: '#00B4B4' },
 ];
 
@@ -51,19 +51,19 @@ export default function StatsCards() {
     return [
       {
         value: String(health.hospitals_count ?? health.hospital_count ?? 0),
-        label: 'RS Terjangkau',
-        unit: 'rumah sakit',
+        label: 'Reachable Hospitals',
+        unit: 'hospitals',
         color: '#00B4B4',
       },
       {
         value: `${availabilityPercent}%`,
-        label: 'Kapasitas Bebas',
-        unit: 'dari total',
+        label: 'Available Capacity',
+        unit: 'of total',
         color: '#00B4B4',
       },
       {
         value: availableBeds.toLocaleString('id-ID'),
-        label: 'Bed Tersedia',
+        label: 'Available Beds',
         unit: `${capacity.toLocaleString('id-ID')} total`,
         color: '#00B4B4',
       },
@@ -79,7 +79,7 @@ export default function StatsCards() {
   return (
     <section>
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/80">
-        Ringkasan Operasional
+        Operational Summary
       </h3>
       <div className="grid grid-cols-2 gap-3">
         {stats.map((stat) => (

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   if (!lat || !lng) {
     return NextResponse.json(
-      { success: false, error: 'Parameter lat dan lng wajib diisi' },
+      { success: false, error: 'lat and lng parameters are required' },
       { status: 400 },
     );
   }

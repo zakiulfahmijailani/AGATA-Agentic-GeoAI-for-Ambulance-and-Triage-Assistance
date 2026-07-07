@@ -81,9 +81,17 @@ export function getBedStatus(hospital: Hospital): BedStatus {
 }
 
 export const BED_STATUS_LABEL: Record<BedStatus, string> = {
-  available: 'Tersedia',
-  limited: 'Terbatas',
-  full: 'Penuh',
+  available: 'Available',
+  limited: 'Limited',
+  full: 'Full',
+};
+
+export const ZONE_LABEL: Record<Hospital['zone'], string> = {
+  Pusat: 'Central',
+  Selatan: 'South',
+  Timur: 'East',
+  Utara: 'North',
+  Barat: 'West',
 };
 
 export const BED_STATUS_COLOR: Record<BedStatus, string> = {

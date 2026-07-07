@@ -14,7 +14,7 @@ const MapView = dynamic(() => import('@/components/webgis/MapView'), {
     <section className="flex h-full flex-1 items-center justify-center bg-surface">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal border-t-transparent" />
-        <p className="text-sm text-[var(--color-text-secondary)]">Memuat peta...</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">Loading map...</p>
       </div>
     </section>
   ),
@@ -24,7 +24,7 @@ const initialSystemMessage: Message = {
   id: 'system-welcome',
   role: 'system',
   content:
-    'Halo! Saya AGATA. Masukkan lokasi pasien di Jakarta untuk mendapatkan rekomendasi rumah sakit terdekat.',
+    'Hello! I am AGATA. Enter the patient location in Jakarta to get the nearest hospital recommendations.',
   timestamp: new Date(),
 };
 
@@ -44,19 +44,19 @@ function createMessageId(prefix: string): string {
 }
 
 function formatDistance(distance?: number): string {
-  return typeof distance === 'number' ? `${distance.toFixed(1)} km` : 'jarak belum tersedia';
+  return typeof distance === 'number' ? `${distance.toFixed(1)} km` : 'distance unavailable';
 }
 
 function createNearestHospitalResponse(query: string, hospitals: Hospital[]): string {
   if (!hospitals.length) {
-    return `Analisis selesai untuk "${query}", tetapi belum ada rumah sakit dalam radius pencarian yang bisa direkomendasikan dari data Neon.`;
+    return `Analysis complete for "${query}", but no hospitals in the search radius can be recommended from the Neon data yet.`;
   }
 
   const lines = hospitals.map((hospital, index) => {
-    return `${index + 1}. **${hospital.name}** - ${formatDistance(hospital.distance_km)} - TL${hospital.trauma_level} - ER ${hospital.er_status} - ${hospital.available_beds}/${hospital.capacity} bed tersedia`;
+    return `${index + 1}. **${hospital.name}** - ${formatDistance(hospital.distance_km)} - TL${hospital.trauma_level} - ER ${hospital.er_status} - ${hospital.available_beds}/${hospital.capacity} beds available`;
   });
 
-  return `Analisis selesai untuk "${query}". Rekomendasi terdekat dari data 234 RS Jakarta:\n\n${lines.join('\n')}\n\nPeta sudah menandai lokasi pasien dan rumah sakit rekomendasi.`;
+  return `Analysis complete for "${query}". Nearest recommendations from the 234 Jakarta hospital records:\n\n${lines.join('\n')}\n\nThe map has marked the patient location and recommended hospitals.`;
 }
 
 async function fetchNearestHospitals(patientLocation: [number, number]): Promise<Hospital[]> {
@@ -254,7 +254,7 @@ export default function FullscreenDashboardPage() {
             type="button"
             onClick={() => setSidebarOpen(true)}
             className="absolute left-0 top-1/2 z-40 -translate-y-1/2 rounded-r-md border border-l-0 border-[var(--color-border)] bg-card p-2 text-[var(--color-text-secondary)] shadow-md transition-colors duration-150 hover:text-[var(--color-text-primary)]"
-            aria-label="Buka panel"
+            aria-label="Open panel"
           >
             <ChevronRight className="h-5 w-5" />
           </button>

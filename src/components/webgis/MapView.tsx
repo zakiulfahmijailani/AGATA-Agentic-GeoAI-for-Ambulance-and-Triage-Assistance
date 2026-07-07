@@ -18,6 +18,7 @@ import {
   Hospital,
   HospitalFilters,
   HospitalsApiResponse,
+  ZONE_LABEL,
 } from '@/types';
 import FilterPanel from './FilterPanel';
 
@@ -198,7 +199,7 @@ export default function MapView({
               <Popup>
                 <div className="space-y-1 text-sm">
                   <div className="font-bold">{hospital.name}</div>
-                  <div>Zona {hospital.zone}</div>
+                  <div>Zone {ZONE_LABEL[hospital.zone]}</div>
                   <div>Trauma Level {hospital.trauma_level}</div>
                   <div>
                     ER {ER_STATUS_LABEL[hospital.er_status]} - {hospital.available_beds}/
@@ -225,7 +226,7 @@ export default function MapView({
               }}
             />
             <Marker position={patientLatLng} icon={createPatientIcon()}>
-              <Popup>Lokasi pasien</Popup>
+              <Popup>Patient location</Popup>
             </Marker>
             {recommendedHospitals.map((hospital) => (
               <Polyline

@@ -1,6 +1,7 @@
 'use client';
 
 import { Activity, Layers, MapPinned } from 'lucide-react';
+import { ZONE_LABEL } from '@/types';
 import type { ERFilter, HospitalFilters, TraumaFilter, ZoneFilter } from '@/types';
 
 interface FilterPanelProps {
@@ -13,9 +14,9 @@ interface FilterPanelProps {
 const zoneOptions: ZoneFilter[] = ['All', 'Pusat', 'Selatan', 'Timur', 'Utara', 'Barat'];
 const traumaOptions: Array<{ value: TraumaFilter; label: string }> = [
   { value: 'All', label: 'All' },
-  { value: 1, label: 'Level 1 (RS Nasional)' },
+  { value: 1, label: 'Level 1 (National Hospital)' },
   { value: 2, label: 'Level 2 (RSUD)' },
-  { value: 3, label: 'Level 3 (Swasta)' },
+  { value: 3, label: 'Level 3 (Private Hospital)' },
 ];
 const erOptions: Array<{ value: ERFilter; label: string }> = [
   { value: 'All', label: 'All' },
@@ -30,16 +31,16 @@ export default function FilterPanel({ filters, total, isLoading = false, onChang
         <div className="flex items-center gap-2">
           <MapPinned className="h-4 w-4 text-teal" />
           <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-            Filter RS Jakarta
+            Jakarta Hospital Filter
           </span>
         </div>
         <span className="rounded-full bg-surface px-2 py-1 text-xs font-semibold text-[var(--color-text-secondary)]">
-          {isLoading ? 'Memuat...' : `${total} RS`}
+          {isLoading ? 'Loading...' : `${total} hospitals`}
         </span>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <FilterGroup icon={<MapPinned className="h-3.5 w-3.5" />} label="Zona">
+        <FilterGroup icon={<MapPinned className="h-3.5 w-3.5" />} label="Zone">
           <div className="flex flex-wrap gap-1.5">
             {zoneOptions.map((zone) => (
               <FilterButton
@@ -47,7 +48,7 @@ export default function FilterPanel({ filters, total, isLoading = false, onChang
                 isActive={filters.zone === zone}
                 onClick={() => onChange({ ...filters, zone })}
               >
-                {zone}
+                {zone === 'All' ? 'All' : ZONE_LABEL[zone]}
               </FilterButton>
             ))}
           </div>

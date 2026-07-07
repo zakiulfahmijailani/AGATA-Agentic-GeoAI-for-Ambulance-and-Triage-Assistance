@@ -77,7 +77,7 @@ export default function HospitalSidebar({
           type="button"
           onClick={onClose}
           className="rounded-md p-1 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
-          aria-label="Tutup panel"
+          aria-label="Close panel"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -92,7 +92,7 @@ export default function HospitalSidebar({
         />
         <TabButton
           icon={<ListChecks className="h-4 w-4" />}
-          label="RS"
+          label="Hospitals"
           isActive={activeTab === 'hospitals'}
           onClick={() => setActiveTab('hospitals')}
         />
@@ -111,12 +111,12 @@ export default function HospitalSidebar({
           <div className="space-y-3">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                {hasRecommendations ? 'Rekomendasi RS' : 'RS Terfilter'}
+                {hasRecommendations ? 'Hospital Recommendations' : 'Filtered Hospitals'}
               </h3>
               <p className="mt-1 text-xs text-white/60">
                 {hasRecommendations
-                  ? `Skenario aktif: ${activeScenarioId ?? 'simulasi'}`
-                  : 'Daftar mengikuti filter yang aktif di peta.'}
+                  ? `Active scenario: ${activeScenarioId ?? 'simulation'}`
+                  : 'The list follows the active map filters.'}
               </p>
             </div>
             {displayedHospitals.length ? (
@@ -132,7 +132,7 @@ export default function HospitalSidebar({
               ))
             ) : (
               <div className="rounded-lg border border-[var(--color-border)] bg-card p-4 text-sm text-[var(--color-text-secondary)] shadow-md">
-                Belum ada rumah sakit untuk filter ini.
+                No hospitals for this filter yet.
               </div>
             )}
           </div>
@@ -145,7 +145,7 @@ export default function HospitalSidebar({
                 <Bot className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Asisten AGATA</h3>
+                <h3 className="text-sm font-bold text-white">AGATA Assistant</h3>
                 <p className="text-xs text-white/60">GeoAI dispatch support</p>
               </div>
             </div>
@@ -208,14 +208,14 @@ export default function HospitalSidebar({
           <input
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
-            placeholder="Masukkan lokasi pasien..."
+            placeholder="Enter patient location..."
             className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-teal text-white transition-colors duration-150 hover:bg-teal-muted disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Kirim"
+            aria-label="Send"
           >
             <Send className="h-4 w-4" />
           </button>

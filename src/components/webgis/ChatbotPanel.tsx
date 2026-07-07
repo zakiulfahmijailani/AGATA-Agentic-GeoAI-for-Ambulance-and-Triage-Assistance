@@ -41,7 +41,9 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
             <Bot className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Asisten AGATA</h2>
+            <h2 className="text-sm font-bold text-[var(--color-text-primary)]">
+              AGATA Assistant
+            </h2>
             <p className="text-xs text-[var(--color-text-secondary)]">GeoAI dispatch support</p>
           </div>
         </div>
@@ -128,14 +130,14 @@ export default function ChatbotPanel({ messages, isLoading, onQuery }: ChatbotPa
           <input
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
-            placeholder="Masukkan lokasi pasien..."
+            placeholder="Enter patient location..."
             className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-teal text-white transition-colors duration-150 hover:bg-teal-muted disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Kirim"
+            aria-label="Send"
           >
             <Send className="h-4 w-4" />
           </button>

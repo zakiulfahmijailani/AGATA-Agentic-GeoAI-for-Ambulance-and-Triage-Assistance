@@ -68,17 +68,17 @@ export default function Topbar({
           <button
             type="button"
             onClick={onToggleTheme}
-            title={isLightMode ? 'Aktifkan mode gelap' : 'Aktifkan mode terang'}
+            title={isLightMode ? 'Enable dark mode' : 'Enable light mode'}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
-            aria-label={isLightMode ? 'Aktifkan mode gelap' : 'Aktifkan mode terang'}
+            aria-label={isLightMode ? 'Enable dark mode' : 'Enable light mode'}
           >
             {isLightMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
           <button
             type="button"
-            title="Demo MVP AGATA menggunakan data mock untuk showcase riset."
+            title="AGATA MVP demo uses mock data for a research showcase."
             className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
-            aria-label="Bantuan"
+            aria-label="Help"
           >
             <HelpCircle className="h-4 w-4" />
           </button>
