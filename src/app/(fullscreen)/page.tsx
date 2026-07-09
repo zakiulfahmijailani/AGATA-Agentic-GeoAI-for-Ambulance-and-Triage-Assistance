@@ -23,6 +23,7 @@ import {
   TrafficCone,
   Wifi,
 } from 'lucide-react';
+import { AERIBadge } from '@/components/AERIBadge';
 import { matchScenario } from '@/lib/mock/chatResponses';
 import { mockAgentSteps } from '@/lib/mock/agentSteps';
 import { ER_STATUS_LABEL, Hospital, HospitalFilters, ZONE_LABEL } from '@/types';
@@ -903,6 +904,13 @@ function TopRecommendationCard({ candidate }: { candidate: RecommendationCandida
         </div>
       </div>
 
+      <AERIBadge
+        bedsAvailable={candidate.availableBeds}
+        erStatus={candidate.erStatus}
+        specialistPresent={candidate.specialistStatus !== 'Unavailable'}
+        etaMinutes={candidate.etaMinutes}
+      />
+
       <div className="mt-4 grid grid-cols-4 gap-2">
         <MetricTile icon={<TrafficCone className="h-4 w-4" />} label="ETA" value={`${candidate.etaMinutes} min`} />
         <MetricTile
@@ -1003,6 +1011,13 @@ function RankedAlternatives({
                     {candidate.score.toFixed(2)}
                   </p>
                   <p className="text-[0.68rem] text-[var(--color-text-secondary)]">score</p>
+                  <AERIBadge
+                    bedsAvailable={candidate.availableBeds}
+                    erStatus={candidate.erStatus}
+                    specialistPresent={candidate.specialistStatus !== 'Unavailable'}
+                    etaMinutes={candidate.etaMinutes}
+                    compact
+                  />
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-4 gap-2 text-[0.68rem] text-[var(--color-text-secondary)]">

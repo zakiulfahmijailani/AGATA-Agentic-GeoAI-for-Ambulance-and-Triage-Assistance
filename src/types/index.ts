@@ -19,12 +19,6 @@ export interface Hospital {
 
 export type BedStatus = 'available' | 'limited' | 'full';
 export type ERStatus = Hospital['er_status'];
-export type ReadinessCategory =
-  | 'High Readiness'
-  | 'Stable'
-  | 'Strained'
-  | 'Critical'
-  | 'Overloaded';
 export type ZoneFilter = 'All' | 'Pusat' | 'Selatan' | 'Timur' | 'Utara' | 'Barat';
 export type TraumaFilter = 'All' | 1 | 2 | 3;
 export type ERFilter = 'All' | 'AVAILABLE' | 'BUSY';
@@ -78,45 +72,6 @@ export interface Message {
   content: string;
   timestamp: Date;
   hospitals?: Hospital[];
-}
-
-export interface HospitalSubScores {
-  capacityScore: number;
-  erStatusScore: number;
-  traumaScore: number;
-  accessibilityScore: number | null;
-}
-
-export interface HospitalReadinessResult {
-  hospitalId: number;
-  hospitalName: string;
-  zone: Hospital['zone'];
-  subScores: HospitalSubScores;
-  baseScore: number;
-  fullScore: number | null;
-  scoreUsed: number;
-  category: ReadinessCategory;
-}
-
-export interface ZoneReadinessResult {
-  zone: Hospital['zone'];
-  hospitalCount: number;
-  totalCapacity: number;
-  totalAvailableBeds: number;
-  baseScore: number | null;
-  finalScore: number | null;
-  coveragePenalty: number;
-  traumaCoverageModifier: number;
-  category: ReadinessCategory | null;
-}
-
-export interface ZoneMvpResult {
-  zone: Hospital['zone'];
-  bedAvailabilityScore: number | null;
-  erPressureScore: number | null;
-  traumaReadinessScore: number | null;
-  finalScore: number | null;
-  category: ReadinessCategory | null;
 }
 
 export function getBedStatus(hospital: Hospital): BedStatus {

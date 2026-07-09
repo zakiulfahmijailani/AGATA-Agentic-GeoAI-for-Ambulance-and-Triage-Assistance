@@ -1,7 +1,6 @@
 'use client';
 
 import { BedDouble, ExternalLink, MapPin, Navigation } from 'lucide-react';
-import { getHospitalReadinessResult } from '@/lib/aeri';
 import { ER_STATUS_COLOR, ER_STATUS_LABEL, ZONE_LABEL, type Hospital } from '@/types';
 
 interface HospitalCardProps {
@@ -22,7 +21,6 @@ export default function HospitalCard({
   const capacityPercent =
     hospital.capacity > 0 ? Math.round((hospital.available_beds / hospital.capacity) * 100) : 0;
   const distanceLabel = hospital.distance_km ?? distance;
-  const readiness = getHospitalReadinessResult(hospital);
 
   return (
     <article
@@ -66,9 +64,6 @@ export default function HospitalCard({
         </span>
         <span className="rounded-full bg-teal/10 px-2 py-1 text-teal">
           TL{hospital.trauma_level}
-        </span>
-        <span className="rounded-full border border-[var(--color-border)] bg-surface px-2 py-1 text-[var(--color-text-secondary)]">
-          AERI {Math.round(readiness.scoreUsed)} / {readiness.category}
         </span>
         {hospital.operator_type ? (
           <span className="rounded-full border border-[var(--color-border)] bg-surface px-2 py-1 text-[var(--color-text-secondary)]">
