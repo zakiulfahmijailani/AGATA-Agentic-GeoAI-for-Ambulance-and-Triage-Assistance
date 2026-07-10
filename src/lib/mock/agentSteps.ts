@@ -12,10 +12,10 @@ export const mockAgentSteps: AgentStep[] = [
   },
   {
     id: 2,
-    name: 'Spatial Analysis',
+    name: 'Route & Travel Analysis',
     icon: 'MapPin',
     color: '#10b981',
-    description: 'Calculating patient distance to hospitals (PostGIS routing)...',
+    description: 'Computing route viability and estimated travel time as AGATA Index inputs...',
     durationMs: 1000,
     status: 'idle',
   },
