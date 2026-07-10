@@ -12,6 +12,7 @@ import {
   useMap,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { MapPinned } from 'lucide-react';
 import {
   ER_STATUS_COLOR,
   ER_STATUS_LABEL,
@@ -20,6 +21,7 @@ import {
   HospitalsApiResponse,
   ZONE_LABEL,
 } from '@/types';
+import { mockHospitals } from '@/lib/mock/hospitals';
 import FilterPanel from './FilterPanel';
 
 type LeafletDefaultIconPrototype = L.Icon.Default & {
@@ -49,6 +51,37 @@ const CARTO_POSITRON_URL =
   'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 const CARTO_ATTRIBUTION =
   '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>';
+const LEGACY_ZONE_MAP = {
+  'jakarta-pusat': 'Pusat',
+  'jakarta-selatan': 'Selatan',
+  'jakarta-timur': 'Timur',
+  'jakarta-utara': 'Utara',
+  'jakarta-barat': 'Barat',
+} as const;
+const DEMO_HOSPITALS: Hospital[] = mockHospitals.map((hospital, index) => {
+  const erStatus: Hospital['er_status'] =
+    hospital.bedsAvailable === 0 ? 'FULL' : hospital.bedsAvailable <= 4 ? 'BUSY' : 'AVAILABLE';
+  const traumaLevel: Hospital['trauma_level'] = hospital.level === 'Type A' ? 1 : hospital.level === 'Type B' ? 2 : 3;
+
+  return {
+    id: 9001 + index,
+    name: hospital.name,
+    address: hospital.address,
+    phone: hospital.phone,
+    zone: LEGACY_ZONE_MAP[hospital.zone],
+    lat: hospital.coordinates[1],
+    lng: hospital.coordinates[0],
+    capacity: hospital.totalBeds,
+    available_beds: hospital.bedsAvailable,
+    er_status: erStatus,
+    trauma_level: traumaLevel,
+    operator: hospital.specializations.join(', '),
+    operator_type: hospital.level,
+    website: '',
+    osm_id: 9001 + index,
+    distance_km: undefined,
+  };
+});
 
 function toLeafletLatLng(hospital: Hospital): [number, number] {
   return [hospital.lat, hospital.lng];
@@ -66,7 +99,7 @@ function createHospitalIcon(hospital: Hospital, isRecommended: boolean): L.DivIc
     className: 'agata-leaflet-icon',
     html: `<div class="agata-hospital-marker${
       isRecommended ? ' is-recommended' : ''
-    }" style="--marker-color: ${color};">+</div>`,
+    }" style="--marker-color: ${color};">H</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -90,6 +123,15 @@ function buildHospitalsUrl(filters: HospitalFilters): string {
   if (filters.erStatus !== 'All') params.set('er_status', filters.erStatus);
   const query = params.toString();
   return query ? `/api/hospitals?${query}` : '/api/hospitals';
+}
+
+function filterDemoHospitals(filters: HospitalFilters): Hospital[] {
+  return DEMO_HOSPITALS.filter((hospital) => {
+    if (filters.zone !== 'All' && hospital.zone !== filters.zone) return false;
+    if (filters.traumaLevel !== 'All' && hospital.trauma_level !== filters.traumaLevel) return false;
+    if (filters.erStatus !== 'All' && hospital.er_status !== filters.erStatus) return false;
+    return true;
+  });
 }
 
 function MapCamera({
@@ -150,14 +192,16 @@ export default function MapView({
         if (!response.ok) throw new Error('Hospital API request failed');
 
         const data = (await response.json()) as HospitalsApiResponse;
-        setHospitals(data.hospitals);
-        setTotal(data.total);
-        onHospitalsChange?.(data.hospitals);
+        const nextHospitals = data.hospitals.length ? data.hospitals : filterDemoHospitals(filters);
+        setHospitals(nextHospitals);
+        setTotal(nextHospitals.length);
+        onHospitalsChange?.(nextHospitals);
       } catch (error) {
         if (!controller.signal.aborted) {
-          setHospitals([]);
-          setTotal(0);
-          onHospitalsChange?.([]);
+          const nextHospitals = filterDemoHospitals(filters);
+          setHospitals(nextHospitals);
+          setTotal(nextHospitals.length);
+          onHospitalsChange?.(nextHospitals);
         }
       } finally {
         if (!controller.signal.aborted) setIsLoading(false);
@@ -171,6 +215,12 @@ export default function MapView({
 
   return (
     <section className="relative h-full flex-1 overflow-hidden bg-surface">
+      <div className="pointer-events-none absolute left-5 top-5 z-[500] flex w-[min(420px,calc(100%-2.5rem))] items-center gap-3 rounded-md border border-[var(--color-border)] bg-card/95 px-4 py-3 text-sm text-[var(--color-text-secondary)] shadow-md backdrop-blur">
+        <MapPinned className="h-4 w-4 shrink-0 text-teal" />
+        <span className="truncate">Search location, hospital, or district</span>
+        <span className="ml-auto rounded border border-[var(--color-border)] px-2 py-1 text-xs font-semibold">Jakarta</span>
+      </div>
+
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
@@ -216,33 +266,69 @@ export default function MapView({
           <>
             <Circle
               center={patientLatLng}
-              radius={5000}
+              radius={2400}
               pathOptions={{
-                  color: '#00B4B4',
-                  fillColor: '#00B4B4',
-                fillOpacity: 0.12,
-                opacity: 0.8,
-                weight: 1.5,
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 0.04,
+                opacity: 0.72,
+                weight: 1.2,
+                dashArray: '4 6',
+              }}
+            />
+            <Circle
+              center={patientLatLng}
+              radius={5200}
+              pathOptions={{
+                color: '#00B4B4',
+                fillColor: '#00B4B4',
+                fillOpacity: 0.05,
+                opacity: 0.82,
+                weight: 1.4,
+                dashArray: '6 8',
+              }}
+            />
+            <Circle
+              center={patientLatLng}
+              radius={8600}
+              pathOptions={{
+                color: '#2563eb',
+                fillColor: '#2563eb',
+                fillOpacity: 0.03,
+                opacity: 0.62,
+                weight: 1.2,
+                dashArray: '8 10',
               }}
             />
             <Marker position={patientLatLng} icon={createPatientIcon()}>
               <Popup>Patient location</Popup>
             </Marker>
-            {recommendedHospitals.map((hospital) => (
-              <Polyline
-                key={`route-${hospital.id}`}
-                positions={[patientLatLng, toLeafletLatLng(hospital)]}
-                pathOptions={{
-                  color: '#00B4B4',
-                  dashArray: '8 6',
-                  opacity: 0.9,
-                  weight: 2,
-                }}
-              />
-            ))}
+            {recommendedHospitals.map((hospital, index) => {
+              const selected = hospital.id === selectedHospitalId || (!selectedHospitalId && index === 0);
+              return (
+                <Polyline
+                  key={`route-${hospital.id}`}
+                  positions={[patientLatLng, toLeafletLatLng(hospital)]}
+                  pathOptions={{
+                    color: selected ? '#00B4B4' : index === 1 ? '#f59e0b' : '#64748b',
+                    dashArray: selected ? undefined : '8 6',
+                    opacity: selected ? 0.96 : 0.72,
+                    weight: selected ? 4 : 2.5,
+                  }}
+                />
+              );
+            })}
           </>
         ) : null}
       </MapContainer>
+
+      {patientLatLng ? (
+        <div className="absolute left-5 top-[82px] z-[500] grid grid-cols-3 gap-2 rounded-md border border-[var(--color-border)] bg-card/95 p-2 text-center text-[0.68rem] font-bold shadow-md backdrop-blur">
+          <span className="rounded bg-amber-50 px-2 py-1 text-amber-700">5 min</span>
+          <span className="rounded bg-teal/10 px-2 py-1 text-teal">10 min</span>
+          <span className="rounded bg-blue-50 px-2 py-1 text-blue-700">15 min</span>
+        </div>
+      ) : null}
 
       <FilterPanel
         filters={filters}

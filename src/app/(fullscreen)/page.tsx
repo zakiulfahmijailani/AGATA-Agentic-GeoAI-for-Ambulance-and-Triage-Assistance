@@ -14,6 +14,7 @@ import {
   Layers,
   MapPin,
   MapPinned,
+  Menu,
   Pin,
   RefreshCw,
   RotateCcw,
@@ -416,89 +417,105 @@ export default function FullscreenDashboardPage() {
     <div className="flex h-screen w-full flex-col overflow-hidden bg-surface text-[var(--color-text-primary)]">
       <CommandTopBar clock={clock} />
 
-      <main className="grid min-h-0 flex-1 grid-cols-[340px_minmax(420px,1fr)_440px] overflow-x-auto overflow-y-hidden max-xl:grid-cols-[320px_minmax(420px,1fr)_400px]">
-        <CaseIntakePanel
-          locationInput={locationInput}
-          chiefComplaint={chiefComplaint}
-          severity={severity}
-          specialty={specialty}
-          notes={notes}
-          isRunning={isRunning}
-          onLocationChange={setLocationInput}
-          onComplaintChange={setChiefComplaint}
-          onSeverityChange={setSeverity}
-          onSpecialtyChange={setSpecialty}
-          onNotesChange={setNotes}
-          onGenerate={handleGenerate}
-          onReset={handleReset}
-          onPreset={handlePreset}
-        />
+      <div className="grid min-h-0 flex-1 grid-cols-[64px_minmax(1180px,1fr)] overflow-hidden">
+        <SideRail />
+        <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_84px] overflow-hidden">
+          <main className="grid min-h-0 grid-cols-[330px_minmax(500px,1fr)_470px] overflow-x-auto overflow-y-hidden max-xl:grid-cols-[320px_minmax(500px,1fr)_430px]">
+            <CaseIntakePanel
+              locationInput={locationInput}
+              chiefComplaint={chiefComplaint}
+              severity={severity}
+              specialty={specialty}
+              notes={notes}
+              isRunning={isRunning}
+              onLocationChange={setLocationInput}
+              onComplaintChange={setChiefComplaint}
+              onSeverityChange={setSeverity}
+              onSpecialtyChange={setSpecialty}
+              onNotesChange={setNotes}
+              onGenerate={handleGenerate}
+              onReset={handleReset}
+              onPreset={handlePreset}
+            />
 
-        <section className="relative min-w-0 border-x border-[var(--color-border)] bg-surface">
-          <div className="absolute right-5 top-5 z-[600] max-w-[360px] rounded-lg border border-[var(--color-border)] bg-card/95 p-3 shadow-md backdrop-blur">
-            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-primary)]">
-              <MapPinned className="h-4 w-4 text-teal" />
-              Jakarta spatial context
-            </div>
-            <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-              Map context supports orientation. Destination ranking remains the decision source.
-            </p>
-          </div>
-          <MapView
-            filters={filters}
-            patientLocation={patientLocation}
-            recommendedIds={recommendedIds}
-            selectedHospitalId={selectedHospitalId}
-            onFiltersChange={handleFiltersChange}
-            onHospitalClick={handleHospitalSelect}
-            onHospitalsChange={setVisibleHospitals}
-          />
-        </section>
+            <section className="relative min-w-0 border-x border-[var(--color-border)] bg-surface">
+              <div className="absolute right-5 top-5 z-[600] rounded-md border border-[var(--color-border)] bg-card/95 px-3 py-2 shadow-md backdrop-blur">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+                  <MapPinned className="h-4 w-4 text-teal" />
+                  Live map context
+                </div>
+              </div>
+              <MapView
+                filters={filters}
+                patientLocation={patientLocation}
+                recommendedIds={recommendedIds}
+                selectedHospitalId={selectedHospitalId}
+                onFiltersChange={handleFiltersChange}
+                onHospitalClick={handleHospitalSelect}
+                onHospitalsChange={setVisibleHospitals}
+              />
+            </section>
 
-        <RecommendationPanel
-          activeCase={activeCase}
-          caseState={caseState}
-          isDone={isDone}
-          currentStepId={currentStepId}
-          topRecommendation={topRecommendation}
-          recommendations={recommendations}
-          alerts={alerts}
-          selectedHospitalId={selectedHospitalId}
-          onSelect={setSelectedHospitalId}
-        />
-      </main>
+            <RecommendationPanel
+              activeCase={activeCase}
+              caseState={caseState}
+              topRecommendation={topRecommendation}
+              recommendations={recommendations}
+              alerts={alerts}
+              selectedHospitalId={selectedHospitalId}
+              onSelect={setSelectedHospitalId}
+            />
+          </main>
+          <ProcessDock currentStepId={currentStepId} isDone={isDone} />
+        </div>
+      </div>
     </div>
   );
 }
 
 function CommandTopBar({ clock }: { clock: string }) {
   return (
-    <header className="z-50 flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-navy px-4 text-white">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-teal">
-          <MapPinned className="h-5 w-5" />
-          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal text-white">
-            <Cross className="h-2.5 w-2.5" />
-          </span>
+    <header className="z-50 flex h-[60px] shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-card px-5 text-[var(--color-text-primary)] shadow-sm">
+      <div className="flex min-w-0 items-center gap-5">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-teal text-white shadow-sm">
+            <MapPinned className="h-5 w-5" />
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-navy text-white">
+              <Cross className="h-2.5 w-2.5" />
+            </span>
+          </div>
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-extrabold tracking-normal text-teal">AGATA</h1>
+          </div>
         </div>
-        <div className="min-w-0">
-          <h1 className="truncate text-base font-bold tracking-tight text-white">AGATA</h1>
-          <p className="truncate text-xs text-white/55">Agentic GeoAI Dispatcher Support</p>
+        <button className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/60 hover:text-teal" aria-label="Toggle navigation">
+          <Menu className="h-4 w-4" />
+        </button>
+        <div className="hidden h-9 items-center gap-1 border-l border-[var(--color-border)] pl-5 text-sm font-semibold xl:flex">
+          <span className="rounded-md bg-teal/10 px-3 py-2 text-teal">Live Operations</span>
+          <span className="rounded-md px-3 py-2 text-[var(--color-text-secondary)]">Monitor</span>
+          <span className="rounded-md px-3 py-2 text-[var(--color-text-secondary)]">Analytics</span>
+          <span className="rounded-md px-3 py-2 text-[var(--color-text-secondary)]">Administration</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 text-xs">
-        <StatusPill icon={<Wifi className="h-3.5 w-3.5" />} label="System online" tone="teal" />
-        <StatusPill icon={<RefreshCw className="h-3.5 w-3.5" />} label="Beds synced 2 min ago" />
-        <StatusPill icon={<MapPin className="h-3.5 w-3.5" />} label="DKI Jakarta" />
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-1 font-mono text-white/80">
+      <div className="flex items-center gap-4 text-xs">
+        <span className="hidden text-[var(--color-text-secondary)] lg:inline">Dispatcher Dashboard</span>
+        <span className="inline-flex items-center gap-1.5 font-mono text-[var(--color-text-primary)]">
           <Clock3 className="h-3.5 w-3.5 text-teal" />
           {clock}
         </span>
-        <button className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white" aria-label="Settings">
+        <StatusPill icon={<Wifi className="h-3.5 w-3.5" />} label="All systems operational" tone="teal" />
+        <StatusPill icon={<RefreshCw className="h-3.5 w-3.5" />} label="Beds synced 2 min ago" />
+        <StatusPill icon={<MapPin className="h-3.5 w-3.5" />} label="DKI Jakarta" />
+        <span className="hidden items-center gap-2 border-l border-[var(--color-border)] pl-4 text-[var(--color-text-secondary)] xl:inline-flex">
+          <HospitalIcon className="h-4 w-4 text-teal" />
+          Dispatcher 07
+        </span>
+        <button className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/60 hover:text-teal" aria-label="Settings">
           <Settings className="h-4 w-4" />
         </button>
-        <button className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white" aria-label="Help">
+        <button className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/60 hover:text-teal" aria-label="Help">
           <HelpCircle className="h-4 w-4" />
         </button>
       </div>
@@ -517,13 +534,52 @@ function StatusPill({
 }) {
   return (
     <span
-      className={`hidden items-center gap-1.5 rounded-full px-2 py-1 text-white/80 lg:inline-flex ${
-        tone === 'teal' ? 'bg-teal/20 text-teal' : 'bg-white/10'
+      className={`hidden items-center gap-1.5 rounded-full px-2.5 py-1 lg:inline-flex ${
+        tone === 'teal' ? 'bg-emerald-50 text-emerald-700' : 'bg-surface text-[var(--color-text-secondary)]'
       }`}
     >
       {icon}
       {label}
     </span>
+  );
+}
+
+function SideRail() {
+  const items = [
+    { icon: <MapPinned className="h-5 w-5" />, label: 'Operations', active: true },
+    { icon: <FileText className="h-5 w-5" />, label: 'Cases' },
+    { icon: <HospitalIcon className="h-5 w-5" />, label: 'Hospitals' },
+    { icon: <TrafficCone className="h-5 w-5" />, label: 'Routes' },
+    { icon: <Layers className="h-5 w-5" />, label: 'Layers' },
+    { icon: <Settings className="h-5 w-5" />, label: 'Settings' },
+  ];
+
+  return (
+    <nav className="flex min-h-0 flex-col items-center justify-between bg-navy py-4 text-white">
+      <div className="space-y-3">
+        {items.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            aria-label={item.label}
+            title={item.label}
+            className={`flex h-10 w-10 items-center justify-center rounded-md transition-colors duration-150 ${
+              item.active ? 'bg-teal text-white shadow-md shadow-teal/20' : 'text-white/65 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            {item.icon}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        aria-label="Help"
+        title="Help"
+        className="flex h-10 w-10 items-center justify-center rounded-md text-white/65 transition-colors duration-150 hover:bg-white/10 hover:text-white"
+      >
+        <HelpCircle className="h-5 w-5" />
+      </button>
+    </nav>
   );
 }
 
@@ -559,27 +615,49 @@ function CaseIntakePanel({
   onPreset: (preset: PresetCase) => void;
 }) {
   return (
-    <aside className="flex min-h-0 flex-col border-r border-white/10 bg-navy text-white">
-      <div className="border-b border-white/10 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-teal">Dispatcher intake</p>
-        <h2 className="mt-1 text-lg font-bold text-white">Active incident case</h2>
-        <p className="mt-1 text-xs leading-relaxed text-white/60">
-          Capture the caller report, generate a destination recommendation, and hand off the decision to the ambulance team.
-        </p>
+    <aside className="flex min-h-0 flex-col border-r border-[var(--color-border)] bg-card">
+      <div className="border-b border-[var(--color-border)] p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-text-primary)]">Incident intake</p>
+          <button
+            type="button"
+            aria-label="Pin patient from map"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/60 hover:text-teal"
+          >
+            <Pin className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="mt-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-red-500">Incident ID</p>
+            <h2 className="mt-1 font-mono text-xl font-extrabold tracking-normal text-red-600">JKR-250520-1024</h2>
+          </div>
+          <span className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-[0.68rem] font-bold uppercase leading-tight text-red-600">
+            Priority
+            <br />
+            High
+          </span>
+        </div>
+        <dl className="mt-4 grid grid-cols-4 gap-2 border-t border-[var(--color-border)] pt-4 text-center">
+          <IncidentMeta label="Reported" value="10:21 WIB" />
+          <IncidentMeta label="Source" value="112 Call" />
+          <IncidentMeta label="Channel" value="Voice" />
+          <IncidentMeta label="Call taker" value="D07" />
+        </dl>
       </div>
 
-      <form onSubmit={onGenerate} className="sidebar-scroll min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+      <form onSubmit={onGenerate} className="sidebar-scroll sidebar-scroll-light min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
         <FieldLabel label="Patient location" />
         <div className="flex gap-2">
           <input
             value={locationInput}
             onChange={(event) => onLocationChange(event.target.value)}
             placeholder="Street, landmark, or district"
-            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
+            className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
           <button
             type="button"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/60 hover:text-teal"
             aria-label="Pin patient from map"
           >
             <Pin className="h-4 w-4" />
@@ -594,12 +672,12 @@ function CaseIntakePanel({
                 key={item}
                 type="button"
                 onClick={() => onSeverityChange(item)}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+                className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors duration-150 ${
                   severity === item
                     ? item === 'Critical'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-teal text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-navy-light hover:text-white'
+                      ? 'border-red-500 bg-red-500 text-white'
+                      : 'border-teal bg-teal text-white'
+                    : 'border-[var(--color-border)] bg-card text-[var(--color-text-secondary)] hover:border-teal/50 hover:bg-surface hover:text-[var(--color-text-primary)]'
                 }`}
               >
                 {item}
@@ -614,7 +692,7 @@ function CaseIntakePanel({
             value={chiefComplaint}
             onChange={(event) => onComplaintChange(event.target.value)}
             placeholder="Example: chest pain, trauma, stroke symptoms"
-            className="w-full rounded-md border border-white/10 bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
+            className="w-full rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
         </div>
 
@@ -629,7 +707,7 @@ function CaseIntakePanel({
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
                   specialty === item
                     ? 'bg-teal text-white'
-                    : 'border border-white/15 text-white/70 hover:bg-navy-light hover:text-white'
+                    : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-teal/50 hover:bg-surface hover:text-[var(--color-text-primary)]'
                 }`}
               >
                 {item}
@@ -645,7 +723,7 @@ function CaseIntakePanel({
             onChange={(event) => onNotesChange(event.target.value)}
             rows={4}
             placeholder="Operational notes, caller context, access constraints"
-            className="w-full resize-none rounded-md border border-white/10 bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
+            className="w-full resize-none rounded-md border border-[var(--color-border)] bg-card px-3 py-2 text-sm text-[var(--color-text-primary)] outline-none transition-colors duration-150 placeholder:text-[var(--color-text-secondary)] focus:border-teal focus:ring-1 focus:ring-teal"
           />
         </div>
 
@@ -656,7 +734,7 @@ function CaseIntakePanel({
               key={preset.label}
               type="button"
               onClick={() => onPreset(preset)}
-              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-left text-xs text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
+              className="w-full rounded-md border border-[var(--color-border)] bg-surface px-3 py-2 text-left text-xs font-medium text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/50 hover:text-[var(--color-text-primary)]"
             >
               {preset.label}
             </button>
@@ -664,7 +742,7 @@ function CaseIntakePanel({
         </div>
       </form>
 
-      <div className="space-y-2 border-t border-white/10 p-4">
+      <div className="space-y-2 border-t border-[var(--color-border)] p-4">
         <button
           type="button"
           onClick={() => onGenerate()}
@@ -677,7 +755,7 @@ function CaseIntakePanel({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white/70 transition-colors duration-150 hover:bg-navy-light hover:text-white"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-secondary)] transition-colors duration-150 hover:border-teal/50 hover:bg-surface hover:text-[var(--color-text-primary)]"
         >
           <RotateCcw className="h-4 w-4" />
           Reset Case
@@ -687,9 +765,18 @@ function CaseIntakePanel({
   );
 }
 
+function IncidentMeta({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[0.58rem] font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-[0.68rem] font-semibold text-[var(--color-text-primary)]">{value}</dd>
+    </div>
+  );
+}
+
 function FieldLabel({ label }: { label: string }) {
   return (
-    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/65">
+    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">
       {label}
     </label>
   );
@@ -698,8 +785,6 @@ function FieldLabel({ label }: { label: string }) {
 function RecommendationPanel({
   activeCase,
   caseState,
-  isDone,
-  currentStepId,
   topRecommendation,
   recommendations,
   alerts,
@@ -708,8 +793,6 @@ function RecommendationPanel({
 }: {
   activeCase: ActiveCase | null;
   caseState: CaseState;
-  isDone: boolean;
-  currentStepId: number | null;
   topRecommendation: RecommendationCandidate | null;
   recommendations: RecommendationCandidate[];
   alerts: string[];
@@ -718,18 +801,21 @@ function RecommendationPanel({
 }) {
   return (
     <aside className="flex min-h-0 flex-col bg-surface">
-      <div className="border-b border-[var(--color-border)] bg-card p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-teal">Decision support</p>
-        <h2 className="mt-1 text-lg font-bold text-[var(--color-text-primary)]">
-          Hospital recommendation
-        </h2>
+      <div className="border-b border-[var(--color-border)] bg-card px-4 py-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">Decision support</p>
+            <h2 className="mt-1 text-lg font-bold text-[var(--color-text-primary)]">
+              Hospital recommendation
+            </h2>
+          </div>
+          <span className="rounded-full bg-surface px-2.5 py-1 text-[0.68rem] font-semibold text-[var(--color-text-secondary)]">
+            Live ranking
+          </span>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        <OperationalAlerts alerts={alerts} state={caseState} />
-        <CaseSummary activeCase={activeCase} />
-        <ProcessTransparency currentStepId={currentStepId} isDone={isDone} />
-
         {caseState === 'empty' ? <EmptyRecommendationState /> : null}
         {caseState === 'loading' ? <LoadingRecommendationState /> : null}
         {caseState !== 'empty' && caseState !== 'loading' && topRecommendation ? (
@@ -742,6 +828,8 @@ function RecommendationPanel({
             />
           </>
         ) : null}
+        <OperationalAlerts alerts={alerts} state={caseState} />
+        <CaseSummary activeCase={activeCase} />
       </div>
     </aside>
   );
@@ -813,7 +901,7 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ProcessTransparency({
+function ProcessDock({
   currentStepId,
   isDone,
 }: {
@@ -821,29 +909,35 @@ function ProcessTransparency({
   isDone: boolean;
 }) {
   return (
-    <section className="rounded-lg border border-[var(--color-border)] bg-card p-4 shadow-sm">
-      <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">AGATA process check</h3>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        {mockAgentSteps.map((step) => {
-          const complete = isDone || (currentStepId !== null && step.id < currentStepId);
-          const running = currentStepId === step.id;
-          return (
+    <section className="grid grid-cols-4 gap-3 border-t border-[var(--color-border)] bg-card px-4 py-3 shadow-[0_-8px_20px_rgba(15,23,42,0.04)]">
+      {mockAgentSteps.map((step) => {
+        const complete = isDone || (currentStepId !== null && step.id < currentStepId);
+        const running = currentStepId === step.id;
+        return (
+          <div
+            key={step.id}
+            className={`relative flex min-w-0 items-center gap-3 rounded-md border px-3 py-2 ${
+              complete
+                ? 'border-teal/45 bg-teal/5'
+                : running
+                  ? 'border-teal bg-card shadow-sm shadow-teal/10'
+                  : 'border-[var(--color-border)] bg-surface'
+            }`}
+          >
             <span
-              key={step.id}
-              className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${
-                complete
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : running
-                    ? 'bg-teal/10 text-teal'
-                    : 'bg-surface text-[var(--color-text-secondary)]'
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                complete || running ? 'bg-teal text-white' : 'bg-slate-200 text-[var(--color-text-secondary)]'
               }`}
             >
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              {step.name}
+              {complete ? <CheckCircle2 className="h-4 w-4" /> : step.id}
             </span>
-          );
-        })}
-      </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-[var(--color-text-primary)]">{step.name}</p>
+              <p className="truncate text-xs text-[var(--color-text-secondary)]">{step.description}</p>
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -879,21 +973,26 @@ function LoadingRecommendationState() {
 
 function TopRecommendationCard({ candidate }: { candidate: RecommendationCandidate }) {
   return (
-    <section className="rounded-lg border-2 border-teal bg-card p-4 shadow-md">
+    <section className="rounded-md border border-teal bg-card p-4 shadow-md shadow-teal/10">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-teal px-2.5 py-1 text-xs font-bold text-white">Rank #1</span>
-            <span className="rounded-full bg-teal/10 px-2.5 py-1 text-xs font-semibold text-teal">
-              {candidate.statusBadge}
-            </span>
+        <div className="flex min-w-0 gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-teal/10 font-mono text-xl font-bold text-teal">
+            {candidate.rank}
           </div>
-          <h3 className="mt-3 text-xl font-bold leading-tight text-[var(--color-text-primary)]">
-            {candidate.name}
-          </h3>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{candidate.district}</p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-teal px-2.5 py-1 text-xs font-bold text-white">Rank #1</span>
+              <span className="rounded-full bg-teal/10 px-2.5 py-1 text-xs font-semibold text-teal">
+                {candidate.statusBadge}
+              </span>
+            </div>
+            <h3 className="mt-3 truncate text-lg font-bold leading-tight text-[var(--color-text-primary)]">
+              {candidate.name}
+            </h3>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{candidate.district}</p>
+          </div>
         </div>
-        <div className="text-right">
+        <div className="shrink-0 text-right">
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
             AGATA Index
           </p>
@@ -903,18 +1002,19 @@ function TopRecommendationCard({ candidate }: { candidate: RecommendationCandida
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        <MetricTile icon={<TrafficCone className="h-4 w-4" />} label="ETA" value={`${candidate.etaMinutes} min`} />
+      <div className="mt-4 grid grid-cols-4 divide-x divide-[var(--color-border)] border-y border-[var(--color-border)] py-3">
+        <MetricTile icon={<TrafficCone className="h-4 w-4" />} label="ETA" value={`${candidate.etaMinutes} min`} detail="estimated" />
         <MetricTile
           icon={<BedDouble className="h-4 w-4" />}
           label="Beds"
           value={`${candidate.availableBeds}/${candidate.capacity}`}
+          detail="available"
         />
-        <MetricTile icon={<Stethoscope className="h-4 w-4" />} label="Specialist" value={candidate.specialistStatus} />
-        <MetricTile icon={<Layers className="h-4 w-4" />} label="Level" value={candidate.hospitalLevel.split('/')[0].trim()} />
+        <MetricTile icon={<Stethoscope className="h-4 w-4" />} label="Specialist" value={candidate.specialistStatus} detail="coverage" />
+        <MetricTile icon={<Layers className="h-4 w-4" />} label="Level" value={candidate.hospitalLevel.split('/')[0].trim()} detail="capability" />
       </div>
 
-      <div className="mt-4 rounded-lg bg-surface p-3">
+      <div className="mt-4 rounded-md bg-surface p-3">
         <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
           Why this is recommended
         </h4>
@@ -944,20 +1044,23 @@ function MetricTile({
   icon,
   label,
   value,
+  detail,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  detail: string;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-card p-2">
+    <div className="px-3">
       <div className="flex items-center gap-1.5 text-teal">{icon}</div>
-      <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+      <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">
         {label}
       </p>
       <p className="mt-0.5 truncate font-mono text-sm font-bold tabular-nums text-[var(--color-text-primary)]">
         {value}
       </p>
+      <p className="mt-0.5 truncate text-[0.65rem] text-[var(--color-text-secondary)]">{detail}</p>
     </div>
   );
 }
@@ -986,26 +1089,32 @@ function RankedAlternatives({
               key={candidate.hospitalId}
               type="button"
               onClick={() => onSelect(candidate.hospitalId)}
-              className={`w-full rounded-lg border bg-card p-3 text-left shadow-sm transition-colors duration-150 ${
+              className={`w-full rounded-md border bg-card p-3 text-left shadow-sm transition-colors duration-150 ${
                 selected ? 'border-teal bg-teal/5' : 'border-[var(--color-border)] hover:border-teal/50'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-teal">Rank #{candidate.rank}</p>
-                  <h4 className="mt-0.5 truncate text-sm font-semibold text-[var(--color-text-primary)]">
-                    {candidate.name}
-                  </h4>
-                  <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{candidate.miniReason}</p>
+                <div className="flex min-w-0 gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-100 font-mono text-lg font-bold text-[var(--color-text-primary)]">
+                    {candidate.rank}
+                  </span>
+                  <div className="min-w-0">
+                    <h4 className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                      {candidate.name}
+                    </h4>
+                    <p className="mt-1 truncate text-xs text-[var(--color-text-secondary)]">{candidate.miniReason}</p>
+                  </div>
                 </div>
                 <div className="text-right">
+                  <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+                    AGATA Index
+                  </p>
                   <p className="font-mono text-lg font-bold tabular-nums text-teal">
                     {candidate.score.toFixed(2)}
                   </p>
-                  <p className="text-[0.68rem] text-[var(--color-text-secondary)]">score</p>
                 </div>
               </div>
-              <div className="mt-3 grid grid-cols-4 gap-2 text-[0.68rem] text-[var(--color-text-secondary)]">
+              <div className="mt-3 grid grid-cols-4 gap-2 border-t border-[var(--color-border)] pt-3 text-[0.68rem] text-[var(--color-text-secondary)]">
                 <span className="font-mono tabular-nums">{candidate.etaMinutes} min</span>
                 <span className="font-mono tabular-nums">{candidate.availableBeds} beds</span>
                 <span>{candidate.specialistStatus}</span>

@@ -26,7 +26,7 @@ const erOptions: Array<{ value: ERFilter; label: string }> = [
 
 export default function FilterPanel({ filters, total, isLoading = false, onChange }: FilterPanelProps) {
   return (
-    <div className="absolute left-5 top-5 z-[500] w-[min(560px,calc(100%-2.5rem))] rounded-lg border border-[var(--color-border)] bg-card p-3 text-[var(--color-text-primary)] shadow-md">
+    <div className="absolute bottom-5 right-5 z-[500] w-[min(360px,calc(100%-2.5rem))] rounded-md border border-[var(--color-border)] bg-card/95 p-3 text-[var(--color-text-primary)] shadow-md backdrop-blur">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <MapPinned className="h-4 w-4 text-teal" />
@@ -39,7 +39,7 @@ export default function FilterPanel({ filters, total, isLoading = false, onChang
         </span>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3">
         <FilterGroup icon={<MapPinned className="h-3.5 w-3.5" />} label="Zone">
           <div className="flex flex-wrap gap-1.5">
             {zoneOptions.map((zone) => (
