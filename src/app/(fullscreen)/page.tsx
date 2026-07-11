@@ -24,6 +24,8 @@ import {
   TrafficCone,
   Wifi,
 } from 'lucide-react';
+import HospitalSankeyModal from '@/components/charts/HospitalSankeyModal';
+import { dummyHospitals, type DummyHospital } from '@/lib/dummyHospitals';
 import { matchScenario } from '@/lib/mock/chatResponses';
 import { mockAgentSteps } from '@/lib/mock/agentSteps';
 import { ER_STATUS_LABEL, Hospital, HospitalFilters, ZONE_LABEL } from '@/types';
@@ -181,6 +183,33 @@ interface NearestHospitalsApiResponse {
   data?: Hospital[];
 }
 
+function resolveDummyHospital(candidate: RecommendationCandidate): DummyHospital {
+  const candidateId = String(candidate.hospitalId);
+  const normalizedName = candidate.name.toLowerCase();
+  const exactMatch = dummyHospitals.find((hospital) => hospital.index.hospital_id === candidateId);
+  const nameMatch = dummyHospitals.find((hospital) => {
+    const dummyName = hospital.index.hospital_name.toLowerCase();
+
+    return (
+      normalizedName.includes(dummyName.replace('rs ', '')) ||
+      dummyName.includes(normalizedName.replace('rsupn dr. ', '').replace('rsup ', 'rs '))
+    );
+  });
+  const profile = exactMatch ?? nameMatch ?? dummyHospitals[(Math.max(candidate.rank, 1) - 1) % dummyHospitals.length];
+
+  return {
+    index: {
+      ...profile.index,
+      hospital_id: candidateId,
+      hospital_name: candidate.name,
+    },
+    pillars: {
+      ...profile.pillars,
+      hospital_id: candidateId,
+    },
+  };
+}
+
 function formatClock(date: Date): string {
   return new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
@@ -293,6 +322,7 @@ export default function FullscreenDashboardPage() {
   const [specialty, setSpecialty] = useState<Specialty>('Cardiac');
   const [notes, setNotes] = useState('Caller reports unstable breathing. Family is waiting roadside.');
   const [recommendations, setRecommendations] = useState<RecommendationCandidate[]>([]);
+  const [selectedSankeyHospital, setSelectedSankeyHospital] = useState<DummyHospital | null>(null);
   const timersRef = useRef<number[]>([]);
 
   const isRunning = caseState === 'loading';
@@ -325,11 +355,16 @@ export default function FullscreenDashboardPage() {
     setSelectedHospitalId(hospital.id);
   }, []);
 
+  const handleShowReason = useCallback((candidate: RecommendationCandidate) => {
+    setSelectedSankeyHospital(resolveDummyHospital(candidate));
+  }, []);
+
   const handleFiltersChange = useCallback((nextFilters: HospitalFilters) => {
     setFilters(nextFilters);
     setRecommendedIds([]);
     setRecommendedHospitals([]);
     setSelectedHospitalId(null);
+    setSelectedSankeyHospital(null);
   }, []);
 
   const handlePreset = useCallback((preset: PresetCase) => {
@@ -346,6 +381,7 @@ export default function FullscreenDashboardPage() {
     setRecommendedIds([]);
     setRecommendedHospitals([]);
     setSelectedHospitalId(null);
+    setSelectedSankeyHospital(null);
     setRecommendations([]);
     setActiveCase(null);
     setCaseState('empty');
@@ -368,6 +404,7 @@ export default function FullscreenDashboardPage() {
       setRecommendations([]);
       setRecommendedIds([]);
       setRecommendedHospitals([]);
+      setSelectedSankeyHospital(null);
 
       mockAgentSteps.forEach((step, index) => {
         const timer = window.setTimeout(() => setCurrentStepId(step.id), index * 550);
@@ -464,11 +501,13 @@ export default function FullscreenDashboardPage() {
               alerts={alerts}
               selectedHospitalId={selectedHospitalId}
               onSelect={setSelectedHospitalId}
+              onShowReason={handleShowReason}
             />
           </main>
           <ProcessDock currentStepId={currentStepId} isDone={isDone} />
         </div>
       </div>
+      <HospitalSankeyModal hospital={selectedSankeyHospital} onClose={() => setSelectedSankeyHospital(null)} />
     </div>
   );
 }
@@ -790,6 +829,7 @@ function RecommendationPanel({
   alerts,
   selectedHospitalId,
   onSelect,
+  onShowReason,
 }: {
   activeCase: ActiveCase | null;
   caseState: CaseState;
@@ -798,6 +838,7 @@ function RecommendationPanel({
   alerts: string[];
   selectedHospitalId: number | null;
   onSelect: (hospitalId: number) => void;
+  onShowReason: (candidate: RecommendationCandidate) => void;
 }) {
   return (
     <aside className="flex min-h-0 flex-col bg-surface">
@@ -820,11 +861,12 @@ function RecommendationPanel({
         {caseState === 'loading' ? <LoadingRecommendationState /> : null}
         {caseState !== 'empty' && caseState !== 'loading' && topRecommendation ? (
           <>
-            <TopRecommendationCard candidate={topRecommendation} />
+            <TopRecommendationCard candidate={topRecommendation} onShowReason={onShowReason} />
             <RankedAlternatives
               candidates={recommendations.slice(1)}
               selectedHospitalId={selectedHospitalId}
               onSelect={onSelect}
+              onShowReason={onShowReason}
             />
           </>
         ) : null}
@@ -971,7 +1013,13 @@ function LoadingRecommendationState() {
   );
 }
 
-function TopRecommendationCard({ candidate }: { candidate: RecommendationCandidate }) {
+function TopRecommendationCard({
+  candidate,
+  onShowReason,
+}: {
+  candidate: RecommendationCandidate;
+  onShowReason: (candidate: RecommendationCandidate) => void;
+}) {
   return (
     <section className="rounded-md border border-teal bg-card p-4 shadow-md shadow-teal/10">
       <div className="flex items-start justify-between gap-3">
@@ -999,6 +1047,13 @@ function TopRecommendationCard({ candidate }: { candidate: RecommendationCandida
           <p className="font-mono text-4xl font-bold tabular-nums text-teal">
             {candidate.score.toFixed(2)}
           </p>
+          <button
+            type="button"
+            onClick={() => onShowReason(candidate)}
+            className="mt-2 rounded-md border border-[#00B4B4] px-3 py-1 text-xs font-medium text-[#00B4B4] transition-colors hover:bg-[#00B4B4] hover:text-white"
+          >
+            Lihat Alasan →
+          </button>
         </div>
       </div>
 
@@ -1069,10 +1124,12 @@ function RankedAlternatives({
   candidates,
   selectedHospitalId,
   onSelect,
+  onShowReason,
 }: {
   candidates: RecommendationCandidate[];
   selectedHospitalId: number | null;
   onSelect: (hospitalId: number) => void;
+  onShowReason: (candidate: RecommendationCandidate) => void;
 }) {
   if (!candidates.length) return null;
 
@@ -1085,10 +1142,18 @@ function RankedAlternatives({
         {candidates.map((candidate) => {
           const selected = selectedHospitalId === candidate.hospitalId;
           return (
-            <button
+            <article
               key={candidate.hospitalId}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(candidate.hospitalId)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onSelect(candidate.hospitalId);
+                }
+              }}
               className={`w-full rounded-md border bg-card p-3 text-left shadow-sm transition-colors duration-150 ${
                 selected ? 'border-teal bg-teal/5' : 'border-[var(--color-border)] hover:border-teal/50'
               }`}
@@ -1112,6 +1177,16 @@ function RankedAlternatives({
                   <p className="font-mono text-lg font-bold tabular-nums text-teal">
                     {candidate.score.toFixed(2)}
                   </p>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onShowReason(candidate);
+                    }}
+                    className="mt-2 rounded-md border border-[#00B4B4] px-3 py-1 text-xs font-medium text-[#00B4B4] transition-colors hover:bg-[#00B4B4] hover:text-white"
+                  >
+                    Lihat Alasan →
+                  </button>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-4 gap-2 border-t border-[var(--color-border)] pt-3 text-[0.68rem] text-[var(--color-text-secondary)]">
@@ -1120,7 +1195,7 @@ function RankedAlternatives({
                 <span>{candidate.specialistStatus}</span>
                 <span>{candidate.erStatus}</span>
               </div>
-            </button>
+            </article>
           );
         })}
       </div>
