@@ -1052,7 +1052,7 @@ function TopRecommendationCard({
             onClick={() => onShowReason(candidate)}
             className="mt-2 rounded-md border border-[#00B4B4] px-3 py-1 text-xs font-medium text-[#00B4B4] transition-colors hover:bg-[#00B4B4] hover:text-white"
           >
-            Lihat Alasan →
+            Why this hospital? →
           </button>
         </div>
       </div>
@@ -1185,7 +1185,7 @@ function RankedAlternatives({
                     }}
                     className="mt-2 rounded-md border border-[#00B4B4] px-3 py-1 text-xs font-medium text-[#00B4B4] transition-colors hover:bg-[#00B4B4] hover:text-white"
                   >
-                    Lihat Alasan →
+                    Why this hospital? →
                   </button>
                 </div>
               </div>

@@ -23,6 +23,7 @@ export default function HospitalSankeyModal({ hospital, onClose }: HospitalSanke
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-bold text-[#0D2137]">{hospital.index.hospital_name}</h2>
+            <p className="mt-1 text-sm text-slate-500">Why this hospital?</p>
             <div className="mt-2 inline-flex rounded-full bg-[#00B4B4] px-3 py-1 text-sm font-bold text-white">
               AGATA Index: {hospital.index.agata_index.toFixed(3)}
             </div>

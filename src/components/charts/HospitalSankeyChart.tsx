@@ -23,17 +23,17 @@ const nodes: HospitalSankeyNode[] = [
   { id: 'Neon DB', color: '#0D2137' },
   { id: 'Routing Engine', color: '#1A3A5C' },
   { id: 'Case Input', color: '#00B4B4' },
-  { id: 'Ketersediaan Tempat Tidur', color: '#D9E6F2' },
-  { id: 'Ketersediaan ICU', color: '#D9E6F2' },
-  { id: 'Spesialis On-Duty', color: '#D9F2EF' },
-  { id: 'Tipe Fasilitas (RS A/B/C)', color: '#D9F2EF' },
-  { id: 'Estimasi Waktu Tempuh', color: '#E9EEF3' },
-  { id: 'Viabilitas Rute', color: '#E9EEF3' },
-  { id: 'Kesesuaian Tingkat Kegawatan', color: '#FCE3D1' },
-  { id: 'Kesiapan Tempat Tidur', color: '#E75D5D' },
-  { id: 'Kesesuaian Klinis', color: '#F28E2B' },
-  { id: 'Aksesibilitas Spasial', color: '#8A6BE8' },
-  { id: 'Kesesuaian Kegawatan', color: '#E0A21D' },
+  { id: 'Available Beds', color: '#D9E6F2' },
+  { id: 'ICU Availability', color: '#D9E6F2' },
+  { id: 'On-Duty Specialists', color: '#D9F2EF' },
+  { id: 'Facility Type (Hospital A/B/C)', color: '#D9F2EF' },
+  { id: 'Estimated Travel Time', color: '#E9EEF3' },
+  { id: 'Route Viability', color: '#E9EEF3' },
+  { id: 'Severity Level Match', color: '#FCE3D1' },
+  { id: 'Bed Readiness', color: '#E75D5D' },
+  { id: 'Clinical Match', color: '#F28E2B' },
+  { id: 'Spatial Accessibility', color: '#8A6BE8' },
+  { id: 'Severity Match', color: '#E0A21D' },
   { id: 'AGATA Index', color: '#00B4B4' },
 ];
 
@@ -53,28 +53,28 @@ export default function HospitalSankeyChart({
   };
 
   const rawLinks: HospitalSankeyLink[] = [
-    { source: 'Neon DB', target: 'Ketersediaan Tempat Tidur', value: pv.available_beds },
-    { source: 'Neon DB', target: 'Ketersediaan ICU', value: pv.icu_availability },
-    { source: 'Neon DB', target: 'Spesialis On-Duty', value: pv.specialist_on_duty },
-    { source: 'Neon DB', target: 'Tipe Fasilitas (RS A/B/C)', value: pv.facility_tier_score },
-    { source: 'Routing Engine', target: 'Estimasi Waktu Tempuh', value: pv.travel_time_score },
-    { source: 'Routing Engine', target: 'Viabilitas Rute', value: pv.route_viability },
-    { source: 'Case Input', target: 'Kesesuaian Tingkat Kegawatan', value: pv.severity_match },
-    { source: 'Ketersediaan Tempat Tidur', target: 'Kesiapan Tempat Tidur', value: pv.available_beds },
-    { source: 'Ketersediaan ICU', target: 'Kesiapan Tempat Tidur', value: pv.icu_availability },
-    { source: 'Spesialis On-Duty', target: 'Kesesuaian Klinis', value: pv.specialist_on_duty },
-    { source: 'Tipe Fasilitas (RS A/B/C)', target: 'Kesesuaian Klinis', value: pv.facility_tier_score },
-    { source: 'Estimasi Waktu Tempuh', target: 'Aksesibilitas Spasial', value: pv.travel_time_score },
-    { source: 'Viabilitas Rute', target: 'Aksesibilitas Spasial', value: pv.route_viability },
+    { source: 'Neon DB', target: 'Available Beds', value: pv.available_beds },
+    { source: 'Neon DB', target: 'ICU Availability', value: pv.icu_availability },
+    { source: 'Neon DB', target: 'On-Duty Specialists', value: pv.specialist_on_duty },
+    { source: 'Neon DB', target: 'Facility Type (Hospital A/B/C)', value: pv.facility_tier_score },
+    { source: 'Routing Engine', target: 'Estimated Travel Time', value: pv.travel_time_score },
+    { source: 'Routing Engine', target: 'Route Viability', value: pv.route_viability },
+    { source: 'Case Input', target: 'Severity Level Match', value: pv.severity_match },
+    { source: 'Available Beds', target: 'Bed Readiness', value: pv.available_beds },
+    { source: 'ICU Availability', target: 'Bed Readiness', value: pv.icu_availability },
+    { source: 'On-Duty Specialists', target: 'Clinical Match', value: pv.specialist_on_duty },
+    { source: 'Facility Type (Hospital A/B/C)', target: 'Clinical Match', value: pv.facility_tier_score },
+    { source: 'Estimated Travel Time', target: 'Spatial Accessibility', value: pv.travel_time_score },
+    { source: 'Route Viability', target: 'Spatial Accessibility', value: pv.route_viability },
     {
-      source: 'Kesesuaian Tingkat Kegawatan',
-      target: 'Kesesuaian Kegawatan',
+      source: 'Severity Level Match',
+      target: 'Severity Match',
       value: pv.severity_match,
     },
-    { source: 'Kesiapan Tempat Tidur', target: 'AGATA Index', value: hi.p1_bed_readiness * 0.3 },
-    { source: 'Kesesuaian Klinis', target: 'AGATA Index', value: hi.p2_clinical_match * 0.3 },
-    { source: 'Aksesibilitas Spasial', target: 'AGATA Index', value: hi.p3_spatial_access * 0.25 },
-    { source: 'Kesesuaian Kegawatan', target: 'AGATA Index', value: hi.p4_severity_fit * 0.15 },
+    { source: 'Bed Readiness', target: 'AGATA Index', value: hi.p1_bed_readiness * 0.3 },
+    { source: 'Clinical Match', target: 'AGATA Index', value: hi.p2_clinical_match * 0.3 },
+    { source: 'Spatial Accessibility', target: 'AGATA Index', value: hi.p3_spatial_access * 0.25 },
+    { source: 'Severity Match', target: 'AGATA Index', value: hi.p4_severity_fit * 0.15 },
   ];
 
   const links = rawLinks.filter((l) => typeof l.value === 'number' && l.value > 0 && !isNaN(l.value));
@@ -116,7 +116,7 @@ export default function HospitalSankeyChart({
         />
       </div>
       <p className="mt-2 text-center text-xs italic text-slate-400">
-        * Data bersifat ilustratif. Visualisasi ini menggambarkan logika penilaian AGATA Index.
+        * Illustrative data. This visualization represents the AGATA Index scoring logic.
       </p>
     </div>
   );
